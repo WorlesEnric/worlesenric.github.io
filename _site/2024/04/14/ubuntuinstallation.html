@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" name="top">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+  
+  <!-- Option 1: Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
+
+  <!-- FontAwesome Icons -->
+  <script src="https://kit.fontawesome.com/22ab6dd597.js" crossorigin="anonymous"></script>
+
+  <!-- Highlight JS -->
+  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+  
+  
+  <!-- Fork Awesom -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+
+  <!-- ChartJS -->
+  
+
+  <!-- Mathjax support -->
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/assets/css/styles.css">
+
+  <!-- SEO -->
+  <title>
+    
+      DL Development Environment 1 > System Installation and Configuration
+    
+  </title>
+  <link rel="sitemap" type="application/xml" title="sitemap" href="/sitemap.xml" />
+  <!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v4.3.3" />
+<meta property="og:title" content="DL Development Environment 1 &gt; System Installation and Configuration" />
+<meta name="author" content="Qihang Wang" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Table of Contents Table of Contents OS Installation Preparing Ubuntu Image OS Configuration GPU Related Configuration OS Installation" />
+<meta property="og:description" content="Table of Contents Table of Contents OS Installation Preparing Ubuntu Image OS Configuration GPU Related Configuration OS Installation" />
+<link rel="canonical" href="http://localhost:4000/2024/04/14/ubuntuinstallation" />
+<meta property="og:url" content="http://localhost:4000/2024/04/14/ubuntuinstallation" />
+<meta property="og:site_name" content="Qihang’s site" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-04-14T00:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="DL Development Environment 1 &gt; System Installation and Configuration" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Qihang Wang"},"dateModified":"2024-04-14T00:00:00+08:00","datePublished":"2024-04-14T00:00:00+08:00","description":"Table of Contents Table of Contents OS Installation Preparing Ubuntu Image OS Configuration GPU Related Configuration OS Installation","headline":"DL Development Environment 1 &gt; System Installation and Configuration","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2024/04/14/ubuntuinstallation"},"url":"http://localhost:4000/2024/04/14/ubuntuinstallation"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+  <main>
+    <header><nav>
+  <ul>
+    <li>
+      <a class="text-muted" href="/">
+        
+          Qihang&nbsp;Wang's
+        
+      </a>
+    </li>
+    <br />
+    
+    <li>
+      <a href="/overview" >
+      many thanks
+      </a>
+    </li>
+    
+    <li>
+      <a href="/projects" >
+      projects
+      </a>
+    </li>
+    
+    <li>
+      <a href="/blog" >
+      blog
+      </a>
+    </li>
+    
+    <li>
+      <a href="/contact" >
+      contact
+      </a>
+    </li>
+    
+  </ul>
+</nav></header>
+    <section>
+      <div>
+  <h1 style="color: #cc0000;">DL Development Environment 1 > System Installation and Configuration</h1>
+  <span>
+  Tags:
+    
+      <a href="/tag/linux">linux</a>, 
+    
+      <a href="/tag/installation">installation</a>
+    
+  </span>
+  <br />
+  <br />
+  <h1 id="table-of-contents">Table of Contents</h1>
+<ul>
+  <li><a href="#table-of-contents">Table of Contents</a>
+    <ul>
+      <li><a href="#os-installation-">OS Installation </a>
+        <ul>
+          <li><a href="#preparing-ubuntu-image-">Preparing Ubuntu Image </a></li>
+        </ul>
+      </li>
+      <li><a href="#os-configuration">OS Configuration</a>
+        <ul>
+          <li><a href="#gpu-related-configuration-">GPU Related Configuration </a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="os-installation-">OS Installation <a name="osinstallation"></a></h2>
+
+<p>You need:</p>
+
+<ul>
+  <li>
+    <p>A laptop or PC with at least 25GB of storage space.</p>
+  </li>
+  <li>
+    <p>A flash drive (12GB or above recommended).</p>
+  </li>
+</ul>
+
+<h3 id="preparing-ubuntu-image-">Preparing Ubuntu Image <a name="preparation"></a></h3>
+
+<p>Download the image from <a href="https://ubuntu.com/download/desktop">here</a>. We use the Ubuntu 22.04 LTS for this guide.</p>
+
+<p>Staying consistent to the official tutorial, we use <a href="https://etcher.balena.io/">balenaEtcher</a> to create the bootable USB stick. Do the following on balenaEtcher:</p>
+
+<ul>
+  <li>Select your downloaded ISO</li>
+  <li>Choose your USB flash drive</li>
+  <li>Click Flash</li>
+</ul>
+
+<p>You may need to modify the boot option, for this, you may hold <code>F12</code> while the computer starts.</p>
+
+<p>Setting up Ubuntu installation:</p>
+
+<ul>
+  <li>Computer name: Name-PC</li>
+  <li>Name: Name</li>
+  <li>User name: name</li>
+  <li>Password:</li>
+</ul>
+
+<h2 id="os-configuration">OS Configuration</h2>
+
+<p>Ref: <a href="https://gist.github.com/amir-saniyan/b3d8e06145a8569c0d0e030af6d60bea">Ubuntu 22.04 for DL</a></p>
+
+<p>You may update Ubuntu before further operations:</p>
+
+<pre><code class="language-shell">$ sudo apt update
+$ sudo apt full-upgrade --yes
+$ sudo apt autoremove --yes
+$ sudo apt autoclean --yes
+$ reboot
+</code></pre>
+
+<p>You can create a full-update script <code>~/full-update.sh</code> to pack these operations:</p>
+
+<pre><code class="language-shell">#!/usr/bin/env bash
+
+if [ "$EUID" -ne 0 ]
+  then echo "Error: Please run as root."
+  exit
+fi
+
+clear
+
+echo "################################################################################"
+echo "Updating list of available packages..."
+echo "--------------------------------------------------------------------------------"
+apt update
+echo "################################################################################"
+echo
+
+echo "################################################################################"
+echo "Upgrading the system by removing/installing/upgrading packages..."
+echo "--------------------------------------------------------------------------------"
+apt full-upgrade --yes
+echo "################################################################################"
+echo
+
+echo "################################################################################"
+echo "Removing automatically all unused packages..."
+echo "--------------------------------------------------------------------------------"
+apt autoremove --yes
+echo "################################################################################"
+echo
+
+echo "################################################################################"
+echo "Clearing out the local repository of retrieved package files..."
+echo "--------------------------------------------------------------------------------"
+apt autoclean --yes
+echo "################################################################################"
+echo
+</code></pre>
+
+<p>Install the Chrome web browser by (get the deb file <a href="https://www.google.com/chrome/">here</a>):</p>
+
+<pre><code class="language-shell">$ sudo dpkg -i google-chrome-stable_current_amd64.deb
+</code></pre>
+
+<p>Install the developement tools by:</p>
+
+<pre><code class="language-shell">$ sudo apt install build-essential pkg-config cmake cmake-qt-gui ninja-build valgrind
+</code></pre>
+
+<p>Install Python3 and venv by:</p>
+
+<pre><code class="language-shell">$ sudo apt install python3 python3-wheel python3-pip python3-venv python3-dev python3-setuptools
+</code></pre>
+
+<p>Install Git by:</p>
+
+<pre><code class="language-shell">$ sudo apt install git
+$ git config --global user.name "Name"
+$ git config --global user.email "name@domain.com"
+$ git config --global core.editor "gedit -s"
+</code></pre>
+<h3 id="gpu-related-configuration-">GPU Related Configuration <a name="GPU"></a></h3>
+<p>Now it comes to the steps for setting up NVIDIA toolkits. The process here may not align with your situation, check the NVIDIA official toturial whenever there are mistakes.</p>
+
+<p>Check the display hardware by:</p>
+
+<pre><code class="language-shell">$ sudo lshw -C display
+</code></pre>
+
+<p><strong>Check CUDA and NVIDIA Driver Compatibilities</strong> <a href="https://docs.nvidia.com/deeplearning/cudnn/reference/support-matrix.html">here</a>.</p>
+
+<p><strong>Check TensorFlow and CUDA Compatibilities</strong> <a href="https://www.tensorflow.org/install/gpu">here</a> and <a href="https://www.tensorflow.org/install/source#gpu">here</a>.</p>
+
+<p><strong>Check Torch and CUDA Campatibilities</strong> <a href="https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix">here</a>.</p>
+
+<p>Here we use CUDA 11.8, install the NVIDIA Driver by:</p>
+
+<pre><code class="language-shell">$ sudo apt install nvidia-driver-535
+</code></pre>
+
+<p>Install the prerequisites:</p>
+
+<pre><code class="language-shell">$ sudo apt install linux-headers-$(uname -r)
+</code></pre>
+
+<p>Download CUDA 11.8 via:</p>
+
+<pre><code class="language-shell">$ wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run
+</code></pre>
+
+<p>Install CUDA 11.8 by (select without driver):</p>
+
+<pre><code class="language-shell">$ sudo ./cuda_11.8.0_520.61.05_linux.run --override
+</code></pre>
+
+<p>Setting up the environment variables:</p>
+
+<pre><code class="language-shell">export PATH=$PATH:/usr/local/cuda-11.8/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-11.8/lib64:/usr/local/cuda-11.8/extras/CUPTI/lib64
+</code></pre>
+
+<p>Test by:</p>
+
+<pre><code class="language-shell">$ nvidia-smi
+$ NVCC -v
+</code></pre>
+
+<p>Install cuDNN v8.6 for CUDA 11.8. Login and download the deb file <a href="https://developer.nvidia.com/compute/cudnn/secure/8.6.0/local_installers/11.8/cudnn-local-repo-ubuntu2204-8.6.0.163_1.0-1_amd64.deb">here</a></p>
+
+<p>Then install by:</p>
+
+<pre><code class="language-shell">$ sudo dpkg -i cudnn-local-repo-ubuntu2204-8.6.0.163_1.0-1_amd64.deb
+$ sudo cp /var/cudnn-local-repo-ubuntu2204-8.6.0.163/cudnn-local-FAED14DD-keyring.gpg /usr/share/keyrings/
+$ sudo apt update
+$ sudo apt install libcudnn8
+$ sudo apt install libcudnn8-dev
+$ sudo apt install libcudnn8-samples
+</code></pre>
+
+<p>Then reboot by <code>sudo reboot</code></p>
+
+  <hr>
+  <a href="#top">Back to top</a>
+  
+</div>
+    </section>
+  </main>
+  <footer class="stickyfooter text-center">
+  <small>
+  <div class="small"></div>
+    &copy; Qihang Wang, 2024
+    |
+    
+
+
+  <a href="https://twitter.com/worles_enric" target="_blank" style="color: #1da1f2">
+    <span class="bi bi-twitter"></span>
+  </a>
+
+
+  <a href="https://github.com/worlesenric" target="_blank" style="color: #000;">
+    <span class="bi bi-github"></span>
+  </a>
+
+
+  <a href="https://www.linkedin.com/in/unavailable" target="_blank" style="color: #0077b5;">
+    <span class="bi bi-linkedin"></span>
+  </a>
+
+
+  <a href="mailto:" target="_blank" style="color: #666">
+    <span class="bi bi-envelope-open-fill"></span>
+  </a>
+
+
+  <a href="https://keybase.io/keybase" target="_blank" style="color: #FFA500">
+    <span class="fa fa-keybase"></span>
+  </a>
+
+
+    |
+    Powered by <a href="https://github.com/yak-fumblepack/jekyll-academic">Jekyll Academic Theme</a>
+  </small>
+</footer>
+</body>
+</html>

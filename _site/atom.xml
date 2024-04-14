@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+ <title>Qihang's site</title>
+ <link href="http://localhost:4000/atom.xml" rel="self"/>
+ <link href="http://localhost:4000/"/>
+ <updated>2024-04-14T09:31:24+08:00</updated>
+ <id>http://localhost:4000</id>
+ <author>
+   <name>Qihang Wang</name>
+   <email>worlesenric@gmail.com</email>
+ </author>
+
+ 
+ <entry>
+   <title>DL Development Environment 1 &gt; System Installation and Configuration</title>
+   <link href="http://localhost:4000/2024/04/14/ubuntuinstallation"/>
+   <updated>2024-04-14T00:00:00+08:00</updated>
+   <id>http://localhost:4000/2024/04/14/UbuntuInstallation</id>
+   <content type="html">&lt;h1 id=&quot;table-of-contents&quot;&gt;Table of Contents&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;#table-of-contents&quot;&gt;Table of Contents&lt;/a&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#os-installation-&quot;&gt;OS Installation &lt;/a&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;a href=&quot;#preparing-ubuntu-image-&quot;&gt;Preparing Ubuntu Image &lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#os-configuration&quot;&gt;OS Configuration&lt;/a&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;a href=&quot;#gpu-related-configuration-&quot;&gt;GPU Related Configuration &lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;os-installation-&quot;&gt;OS Installation &lt;a name=&quot;osinstallation&quot;&gt;&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;You need:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;A laptop or PC with at least 25GB of storage space.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A flash drive (12GB or above recommended).&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;preparing-ubuntu-image-&quot;&gt;Preparing Ubuntu Image &lt;a name=&quot;preparation&quot;&gt;&lt;/a&gt;&lt;/h3&gt;
+
+&lt;p&gt;Download the image from &lt;a href=&quot;https://ubuntu.com/download/desktop&quot;&gt;here&lt;/a&gt;. We use the Ubuntu 22.04 LTS for this guide.&lt;/p&gt;
+
+&lt;p&gt;Staying consistent to the official tutorial, we use &lt;a href=&quot;https://etcher.balena.io/&quot;&gt;balenaEtcher&lt;/a&gt; to create the bootable USB stick. Do the following on balenaEtcher:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Select your downloaded ISO&lt;/li&gt;
+  &lt;li&gt;Choose your USB flash drive&lt;/li&gt;
+  &lt;li&gt;Click Flash&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You may need to modify the boot option, for this, you may hold &lt;code&gt;F12&lt;/code&gt; while the computer starts.&lt;/p&gt;
+
+&lt;p&gt;Setting up Ubuntu installation:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Computer name: Name-PC&lt;/li&gt;
+  &lt;li&gt;Name: Name&lt;/li&gt;
+  &lt;li&gt;User name: name&lt;/li&gt;
+  &lt;li&gt;Password:&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;os-configuration&quot;&gt;OS Configuration&lt;/h2&gt;
+
+&lt;p&gt;Ref: &lt;a href=&quot;https://gist.github.com/amir-saniyan/b3d8e06145a8569c0d0e030af6d60bea&quot;&gt;Ubuntu 22.04 for DL&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;You may update Ubuntu before further operations:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ sudo apt update
+$ sudo apt full-upgrade --yes
+$ sudo apt autoremove --yes
+$ sudo apt autoclean --yes
+$ reboot
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can create a full-update script &lt;code&gt;~/full-update.sh&lt;/code&gt; to pack these operations:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;#!/usr/bin/env bash
+
+if [ &quot;$EUID&quot; -ne 0 ]
+  then echo &quot;Error: Please run as root.&quot;
+  exit
+fi
+
+clear
+
+echo &quot;################################################################################&quot;
+echo &quot;Updating list of available packages...&quot;
+echo &quot;--------------------------------------------------------------------------------&quot;
+apt update
+echo &quot;################################################################################&quot;
+echo
+
+echo &quot;################################################################################&quot;
+echo &quot;Upgrading the system by removing/installing/upgrading packages...&quot;
+echo &quot;--------------------------------------------------------------------------------&quot;
+apt full-upgrade --yes
+echo &quot;################################################################################&quot;
+echo
+
+echo &quot;################################################################################&quot;
+echo &quot;Removing automatically all unused packages...&quot;
+echo &quot;--------------------------------------------------------------------------------&quot;
+apt autoremove --yes
+echo &quot;################################################################################&quot;
+echo
+
+echo &quot;################################################################################&quot;
+echo &quot;Clearing out the local repository of retrieved package files...&quot;
+echo &quot;--------------------------------------------------------------------------------&quot;
+apt autoclean --yes
+echo &quot;################################################################################&quot;
+echo
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install the Chrome web browser by (get the deb file &lt;a href=&quot;https://www.google.com/chrome/&quot;&gt;here&lt;/a&gt;):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ sudo dpkg -i google-chrome-stable_current_amd64.deb
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install the developement tools by:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ sudo apt install build-essential pkg-config cmake cmake-qt-gui ninja-build valgrind
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install Python3 and venv by:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ sudo apt install python3 python3-wheel python3-pip python3-venv python3-dev python3-setuptools
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install Git by:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ sudo apt install git
+$ git config --global user.name &quot;Name&quot;
+$ git config --global user.email &quot;name@domain.com&quot;
+$ git config --global core.editor &quot;gedit -s&quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&quot;gpu-related-configuration-&quot;&gt;GPU Related Configuration &lt;a name=&quot;GPU&quot;&gt;&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;Now it comes to the steps for setting up NVIDIA toolkits. The process here may not align with your situation, check the NVIDIA official toturial whenever there are mistakes.&lt;/p&gt;
+
+&lt;p&gt;Check the display hardware by:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ sudo lshw -C display
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Check CUDA and NVIDIA Driver Compatibilities&lt;/strong&gt; &lt;a href=&quot;https://docs.nvidia.com/deeplearning/cudnn/reference/support-matrix.html&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Check TensorFlow and CUDA Compatibilities&lt;/strong&gt; &lt;a href=&quot;https://www.tensorflow.org/install/gpu&quot;&gt;here&lt;/a&gt; and &lt;a href=&quot;https://www.tensorflow.org/install/source#gpu&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Check Torch and CUDA Campatibilities&lt;/strong&gt; &lt;a href=&quot;https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Here we use CUDA 11.8, install the NVIDIA Driver by:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ sudo apt install nvidia-driver-535
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install the prerequisites:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ sudo apt install linux-headers-$(uname -r)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Download CUDA 11.8 via:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install CUDA 11.8 by (select without driver):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ sudo ./cuda_11.8.0_520.61.05_linux.run --override
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Setting up the environment variables:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;export PATH=$PATH:/usr/local/cuda-11.8/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-11.8/lib64:/usr/local/cuda-11.8/extras/CUPTI/lib64
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Test by:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ nvidia-smi
+$ NVCC -v
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install cuDNN v8.6 for CUDA 11.8. Login and download the deb file &lt;a href=&quot;https://developer.nvidia.com/compute/cudnn/secure/8.6.0/local_installers/11.8/cudnn-local-repo-ubuntu2204-8.6.0.163_1.0-1_amd64.deb&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Then install by:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ sudo dpkg -i cudnn-local-repo-ubuntu2204-8.6.0.163_1.0-1_amd64.deb
+$ sudo cp /var/cudnn-local-repo-ubuntu2204-8.6.0.163/cudnn-local-FAED14DD-keyring.gpg /usr/share/keyrings/
+$ sudo apt update
+$ sudo apt install libcudnn8
+$ sudo apt install libcudnn8-dev
+$ sudo apt install libcudnn8-samples
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then reboot by &lt;code&gt;sudo reboot&lt;/code&gt;&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>DL Development Environment 2 &gt; Tools You May Need</title>
+   <link href="http://localhost:4000/2024/04/14/softwares"/>
+   <updated>2024-04-14T00:00:00+08:00</updated>
+   <id>http://localhost:4000/2024/04/14/Softwares</id>
+   <content type="html">&lt;h1 id=&quot;table-of-contents&quot;&gt;Table of Contents&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;#table-of-contents&quot;&gt;Table of Contents&lt;/a&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#source-mirrors-&quot;&gt;Source Mirrors &lt;/a&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;a href=&quot;#ubuntu-sources-2204-lts-jammy&quot;&gt;Ubuntu Sources (22.04 LTS jammy)&lt;/a&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;a href=&quot;#pypi&quot;&gt;PyPI&lt;/a&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;a href=&quot;#docker-ce&quot;&gt;Docker CE&lt;/a&gt;&lt;/li&gt;
+          &lt;li&gt;&lt;a href=&quot;#dockerhub-mirror&quot;&gt;Dockerhub Mirror&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#proxy-&quot;&gt;Proxy &lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#visual-studio-code-&quot;&gt;Visual Studio Code &lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;source-mirrors-&quot;&gt;Source Mirrors &lt;a name=&quot;mirror&quot;&gt;&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;For users who experience the low connection qualities on certain software sources, you may consider using the source mirrors. Here we record the operations using Tsinghua Open Source Mirror (TUNA).&lt;/p&gt;
+
+&lt;h3 id=&quot;ubuntu-sources-2204-lts-jammy&quot;&gt;Ubuntu Sources (22.04 LTS jammy)&lt;/h3&gt;
+
+&lt;p&gt;Replace the content of &lt;code&gt;/etc/apt/sources.list&lt;/code&gt; with:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
+# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse
+# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse
+deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse
+# deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse
+
+deb http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse
+# deb-src http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse
+
+# deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse
+# # deb-src http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;pypi&quot;&gt;PyPI&lt;/h3&gt;
+
+&lt;p&gt;For the temporary usage, you may directly use:
+&lt;code&gt;pip install -i https://pypi.tuna.tsinghua.edu.cn/simple some-package&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Set as default, you may use:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;python -m pip install --upgrade pip
+# use the below if you cannot upgrade
+# python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade pip
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;docker-ce&quot;&gt;Docker CE&lt;/h3&gt;
+
+&lt;p&gt;You can automatically install docker via:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;export DOWNLOAD_URL=&quot;http://mirrors.tuna.tsinghua.edu.cn/docker-ce&quot;
+# For curl
+curl -fsSL https://get.docker.com/ | sh
+# for wget
+wget -O- https://get.docker.com/ | sh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;OR, you can install mannually. The following commands are for Ubuntu, you can change them according to the instructions &lt;a href=&quot;https://mirrors.tuna.tsinghua.edu.cn/help/docker-ce/&quot;&gt;here&lt;/a&gt;. Uninstall the old version (if there is):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do apt-get remove $pkg; done
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then install the dependencies:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;apt-get update
+apt-get install ca-certificates curl gnupg
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Add the repo:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+echo \
+  &quot;deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] http://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/ubuntu \
+  &quot;$(. /etc/os-release &amp;amp;&amp;amp; echo &quot;$VERSION_CODENAME&quot;)&quot; stable&quot; | \
+  tee /etc/apt/sources.list.d/docker.list &amp;gt; /dev/null
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Install the docker:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;apt-get update
+apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;dockerhub-mirror&quot;&gt;Dockerhub Mirror&lt;/h3&gt;
+
+&lt;p&gt;You can use Aliyun container mirror service to accelerate the &lt;code&gt;docker pull xxx&lt;/code&gt; from docker hub.&lt;/p&gt;
+
+&lt;h2 id=&quot;proxy-&quot;&gt;Proxy &lt;a name=&quot;proxy&quot;&gt;&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;For the similar reasons, you may want to equip your environment with a proxy. This blog shows the utilization of &lt;a href=&quot;https://github.com/wnlen/clash-for-linux&quot;&gt;clash for linux&lt;/a&gt; for this purpose. You may find other solutions via google.&lt;/p&gt;
+
+&lt;p&gt;Download the clash via:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ git clone https://github.com/wanhebin/clash-for-linux.git
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Enter the directory &lt;code&gt;cd clash-for-linux&lt;/code&gt; and edit &lt;code&gt;CLASH_URL&lt;/code&gt; by &lt;code&gt;vim .env&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Start the service via:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ sudo bash start.sh
+# In a new terminal
+$ source /etc/profile.d/clash.sh
+$ proxy_on
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You may check if the service is correctly started:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ netstat -tln | grep -E &apos;9090|789.&apos;
+tcp        0      0 127.0.0.1:9090          0.0.0.0:*               LISTEN     
+tcp6       0      0 :::7890                 :::*                    LISTEN     
+tcp6       0      0 :::7891                 :::*                    LISTEN     
+tcp6       0      0 :::7892                 :::*   
+
+$ env | grep -E &apos;http_proxy|https_proxy&apos;
+http_proxy=http://127.0.0.1:7890
+https_proxy=http://127.0.0.1:7890                 
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If you wang to shutdown or restart (maybe for updating configurations):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;#shuting down
+sudo bash shutdown.sh
+proxy_off
+
+#restarting
+sudo bash restart.sh
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;clash dashboard is by default hosted on &lt;code&gt;http://192.168.0.1:9090/&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;visual-studio-code-&quot;&gt;Visual Studio Code &lt;a name=&quot;vscode&quot;&gt;&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Download the VSCode client &lt;a href=&quot;https://code.visualstudio.com/&quot;&gt;here&lt;/a&gt;, then install via &lt;code&gt;sudo apt install ./&amp;lt;file&amp;gt;.deb&lt;/code&gt;.&lt;/p&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>DL Development Environment 3 &gt; Libararies You May Need</title>
+   <link href="http://localhost:4000/2024/04/14/dllibs"/>
+   <updated>2024-04-14T00:00:00+08:00</updated>
+   <id>http://localhost:4000/2024/04/14/DLlibs</id>
+   <content type="html">&lt;h1 id=&quot;table-of-contents&quot;&gt;Table of Contents&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;#table-of-contents&quot;&gt;Table of Contents&lt;/a&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#ml-libararies-&quot;&gt;ML libararies &lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#pytorch-&quot;&gt;Pytorch &lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#tensorflow--&quot;&gt;Tensorflow  &lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;ml-libararies-&quot;&gt;ML libararies &lt;a name=&quot;mllibs&quot;&gt;&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Prepare the common ML libs (you can also access them via anaconda)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ python3 -m venv ~/venvs/ml
+$ source ~/venvs/ml/bin/activate
+(ml) $ pip install --upgrade pip setuptools wheel
+(ml) $ pip install --upgrade numpy scipy matplotlib ipython jupyter pandas sympy nose
+(ml) $ pip install --upgrade scikit-learn scikit-image
+(ml) $ deactivate
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;pytorch-&quot;&gt;Pytorch &lt;a name=&quot;pytorch&quot;&gt;&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Pytorch CPU:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ python3 -m venv ~/venvs/torchcpu
+$ source ~/venvs/torchcpu/bin/activate
+(torchcpu) $ pip install --upgrade pip setuptools wheel
+(torchcpu) $ pip install --upgrade opencv-python opencv-contrib-python
+(torchcpu) $ pip install --upgrade torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+(torchcpu) $ deactivate
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pytorch GPU (&lt;strong&gt;ALERT&lt;/strong&gt;: Check the CUDA and cuDNN and NVIDIA drive version Compatibilities &lt;a href=&quot;https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix&quot;&gt;here&lt;/a&gt;, and use the correct downloading name to repalce the ones below):&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ python3 -m venv ~/venvs/torchgpu
+$ source ~/venvs/torchgpu/bin/activate
+(torchgpu) $ pip install --upgrade pip setuptools wheel
+(torchgpu) $ pip install --upgrade opencv-python opencv-contrib-python
+(torchgpu) $ pip install --upgrade torch torchvision torchaudio
+(torchgpu) $ deactivate
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;After installation, you may check the availability:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ source ~/venvs/torchgpu/bin/activate
+(torchgpu) $ python
+&amp;gt;&amp;gt;&amp;gt; import torch
+&amp;gt;&amp;gt;&amp;gt; torch.cuda.is_available()
+&amp;gt;&amp;gt;&amp;gt; exit()
+(torchgpu) $ deactivate
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;tensorflow--&quot;&gt;Tensorflow  &lt;a name=&quot;pytorch&quot;&gt;&lt;/a&gt;&lt;/h2&gt;
+
+&lt;p&gt;Tensorflow CPU:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ python3 -m venv ~/venvs/tfcpu
+$ source ~/venvs/tfcpu/bin/activate
+(tfcpu) $ pip install --upgrade pip setuptools wheel
+(tfcpu) $ pip install --upgrade opencv-python opencv-contrib-python
+(tfcpu) $ pip install --upgrade tensorflow-cpu tensorboard keras
+(tfcpu) $ deactivate
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Tensorflow GPU (similar to Pytorch, check the official &lt;a href=&quot;https://www.tensorflow.org/install/gpu&quot;&gt;tutorial&lt;/a&gt;)&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ python3 -m venv ~/venvs/tfgpu
+$ source ~/venvs/tfgpu/bin/activate
+(tfgpu) $ pip install --upgrade pip setuptools wheel
+(tfgpu) $ pip install --upgrade opencv-python opencv-contrib-python
+(tfgpu) $ pip install --upgrade tensorflow tensorboard keras
+(tfgpu) $ deactivate
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Building my blog</title>
+   <link href="http://localhost:4000/2021/04/30/test-post-1"/>
+   <updated>2021-04-30T00:00:00+08:00</updated>
+   <id>http://localhost:4000/2021/04/30/test-post-1</id>
+   <content type="html">&lt;p&gt;Despite there are a lot of ways to build a blog site, I utilized the jeckll academic theme and github pages to reduce the efforts. Find the commands and installation guides below:&lt;/p&gt;
+
+&lt;h2 id=&quot;installation&quot;&gt;Installation&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ git clone https://github.com/yak-fumblepack/jekyll-academic.git
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ bundle install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;building&quot;&gt;Building&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ bundle exec jekyll build
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Use &lt;code&gt;--verbose&lt;/code&gt; if you would like a detailed log.&lt;/p&gt;
+
+&lt;h2 id=&quot;serving&quot;&gt;Serving&lt;/h2&gt;
+&lt;pre&gt;&lt;code class=&quot;language-shell&quot;&gt;$ bundle exec jekyll serve --watch --livereload --incremental
+&lt;/code&gt;&lt;/pre&gt;
+</content>
+ </entry>
+ 
+
+</feed>

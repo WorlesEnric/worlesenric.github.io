@@ -18,7 +18,8 @@ body {
 main {
   display: flex;
   flex-wrap: wrap;
-  max-width: 54rem;
+  max-width: None;
+  width: 100%;
   margin: 2rem 0;
   padding: 1rem;
 }
@@ -86,9 +87,44 @@ header {
   }
 }
 
+// nav {
+//   ul {
+//     display: flex;
+//     justify-content: flex-end;
+//     border-right: 1px solid #eee;
+//   }
+// }
 nav {
+  width: 10%; // Adjust width as needed
+  position: fixed; // Keeps the nav fixed during scrolling
+  height: 50%;
+  top: 0;
+  left: 0;
   ul {
-    border-right: 1px solid #eee;
+    list-style: none; // Removes bullet points
+    padding: 0;
+    margin: 0;
+    width: 100%; // Full width of the nav container
+    height: 100%;
+    display: flex;
+    flex-direction: column; // Stacks items vertically
+    justify-content: center; // Center items vertically if needed
+  }
+
+  li {
+    padding: 10px; // Adds padding to each link
+    display: block; // Ensures each link takes up the full line
+  }
+
+  a {
+    text-decoration: none; // Removes underline from links
+    color: #333; // Color for text
+    display: block; // Makes the links fill the entire list item area
+    width: 100%;
+  }
+
+  a:hover {
+    background-color: #f8f8f8; // Adds a background on hover
   }
 }
 

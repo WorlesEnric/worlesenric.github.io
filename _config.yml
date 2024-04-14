@@ -1,23 +1,23 @@
-title: An Awesome site title
-navbar_title: Jekyll Academic
+title: Qihang's site
+navbar_title: Qihang Wang's
 
 author:
-  name: jekyll-academic # Your name
-  email: your-email@domain.com
+  name: Qihang Wang # Your name
+  email: worlesenric@gmail.com
 
-description: Jekyll academic is a lightweight theme for any academic usecase. Perfect for portfolio websites, blogs, and academia # description of your site
+description: Here we go # description of your site
 
 url: "https://worles.github.io" # The base hostname & protocol for your site, e.g. http://example.com
 baseurl: "" # The subpath of your site, e.g. /blog
 
 jekyllacademic:
-  homepage_title: "Hello world" # Your homepage title
+  homepage_title: "Blog & Notes" # Your homepage title
   disqusname: # Your disqus sitename
-  footer: Author Year, 2021 # Your name, Year
+  footer: Qihang Wang, 2024 # Your name, Year
   contentlicense: "MIT" # Choose either one of these to put: MIT, Commons Clause, CC BY 4.0, CC BY-NC 4.0, CC BY-ND 4.0, CC BY-NC-ND 4.0, CC BY-NC-SA 4.0, CC BY-NC-SA 4.0, CC BY-SA 4.0
   socials:
-    twitter: twitter # Your twitter username
-    github: yak-fumblepack/jekyll-academic # Your github username
+    twitter: worles_enric # Your twitter username
+    github: worlesenric # Your github username
     linkedin: unavailable # Your linkedin
     keybase: keybase # Your keybase
 
@@ -37,6 +37,7 @@ collections:
   posts:
     output: true
     permalink: /:year/:month/:day/:slug
+    future: true
   projects:
     output: true
     permalink: /:collection/:title

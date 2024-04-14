@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" name="top">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+  
+  <!-- Option 1: Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
+
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
+
+  <!-- FontAwesome Icons -->
+  <script src="https://kit.fontawesome.com/22ab6dd597.js" crossorigin="anonymous"></script>
+
+  <!-- Highlight JS -->
+  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/atom-one-light.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+  
+  
+  <!-- Fork Awesom -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.1.7/css/fork-awesome.min.css" integrity="sha256-gsmEoJAws/Kd3CjuOQzLie5Q3yshhvmo7YNtBG7aaEY=" crossorigin="anonymous">
+
+  <!-- ChartJS -->
+  
+
+  <!-- Mathjax support -->
+  
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/assets/css/styles.css">
+
+  <!-- SEO -->
+  <title>
+    
+      DL Development Environment 3 > Libararies You May Need
+    
+  </title>
+  <link rel="sitemap" type="application/xml" title="sitemap" href="/sitemap.xml" />
+  <!-- Begin Jekyll SEO tag v2.8.0 -->
+<meta name="generator" content="Jekyll v4.3.3" />
+<meta property="og:title" content="DL Development Environment 3 &gt; Libararies You May Need" />
+<meta name="author" content="Qihang Wang" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Table of Contents Table of Contents ML libararies Pytorch Tensorflow" />
+<meta property="og:description" content="Table of Contents Table of Contents ML libararies Pytorch Tensorflow" />
+<link rel="canonical" href="http://localhost:4000/2024/04/14/dllibs" />
+<meta property="og:url" content="http://localhost:4000/2024/04/14/dllibs" />
+<meta property="og:site_name" content="Qihang’s site" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2024-04-14T00:00:00+08:00" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="DL Development Environment 3 &gt; Libararies You May Need" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Qihang Wang"},"dateModified":"2024-04-14T00:00:00+08:00","datePublished":"2024-04-14T00:00:00+08:00","description":"Table of Contents Table of Contents ML libararies Pytorch Tensorflow","headline":"DL Development Environment 3 &gt; Libararies You May Need","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/2024/04/14/dllibs"},"url":"http://localhost:4000/2024/04/14/dllibs"}</script>
+<!-- End Jekyll SEO tag -->
+
+</head>
+<body>
+  <main>
+    <header><nav>
+  <ul>
+    <li>
+      <a class="text-muted" href="/">
+        
+          Qihang&nbsp;Wang's
+        
+      </a>
+    </li>
+    <br />
+    
+    <li>
+      <a href="/overview" >
+      many thanks
+      </a>
+    </li>
+    
+    <li>
+      <a href="/projects" >
+      projects
+      </a>
+    </li>
+    
+    <li>
+      <a href="/blog" >
+      blog
+      </a>
+    </li>
+    
+    <li>
+      <a href="/contact" >
+      contact
+      </a>
+    </li>
+    
+  </ul>
+</nav></header>
+    <section>
+      <div>
+  <h1 style="color: #cc0000;">DL Development Environment 3 > Libararies You May Need</h1>
+  <span>
+  Tags:
+    
+      <a href="/tag/linux">linux</a>, 
+    
+      <a href="/tag/installation">installation</a>
+    
+  </span>
+  <br />
+  <br />
+  <h1 id="table-of-contents">Table of Contents</h1>
+<ul>
+  <li><a href="#table-of-contents">Table of Contents</a>
+    <ul>
+      <li><a href="#ml-libararies-">ML libararies </a></li>
+      <li><a href="#pytorch-">Pytorch </a></li>
+      <li><a href="#tensorflow--">Tensorflow  </a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="ml-libararies-">ML libararies <a name="mllibs"></a></h2>
+
+<p>Prepare the common ML libs (you can also access them via anaconda)</p>
+
+<pre><code class="language-shell">$ python3 -m venv ~/venvs/ml
+$ source ~/venvs/ml/bin/activate
+(ml) $ pip install --upgrade pip setuptools wheel
+(ml) $ pip install --upgrade numpy scipy matplotlib ipython jupyter pandas sympy nose
+(ml) $ pip install --upgrade scikit-learn scikit-image
+(ml) $ deactivate
+</code></pre>
+
+<h2 id="pytorch-">Pytorch <a name="pytorch"></a></h2>
+
+<p>Pytorch CPU:</p>
+
+<pre><code class="language-shell">$ python3 -m venv ~/venvs/torchcpu
+$ source ~/venvs/torchcpu/bin/activate
+(torchcpu) $ pip install --upgrade pip setuptools wheel
+(torchcpu) $ pip install --upgrade opencv-python opencv-contrib-python
+(torchcpu) $ pip install --upgrade torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+(torchcpu) $ deactivate
+</code></pre>
+
+<p>Pytorch GPU (<strong>ALERT</strong>: Check the CUDA and cuDNN and NVIDIA drive version Compatibilities <a href="https://github.com/pytorch/pytorch/blob/main/RELEASE.md#release-compatibility-matrix">here</a>, and use the correct downloading name to repalce the ones below):</p>
+
+<pre><code class="language-shell">$ python3 -m venv ~/venvs/torchgpu
+$ source ~/venvs/torchgpu/bin/activate
+(torchgpu) $ pip install --upgrade pip setuptools wheel
+(torchgpu) $ pip install --upgrade opencv-python opencv-contrib-python
+(torchgpu) $ pip install --upgrade torch torchvision torchaudio
+(torchgpu) $ deactivate
+</code></pre>
+
+<p>After installation, you may check the availability:</p>
+
+<pre><code class="language-shell">$ source ~/venvs/torchgpu/bin/activate
+(torchgpu) $ python
+&gt;&gt;&gt; import torch
+&gt;&gt;&gt; torch.cuda.is_available()
+&gt;&gt;&gt; exit()
+(torchgpu) $ deactivate
+</code></pre>
+
+<h2 id="tensorflow--">Tensorflow  <a name="pytorch"></a></h2>
+
+<p>Tensorflow CPU:</p>
+
+<pre><code class="language-shell">$ python3 -m venv ~/venvs/tfcpu
+$ source ~/venvs/tfcpu/bin/activate
+(tfcpu) $ pip install --upgrade pip setuptools wheel
+(tfcpu) $ pip install --upgrade opencv-python opencv-contrib-python
+(tfcpu) $ pip install --upgrade tensorflow-cpu tensorboard keras
+(tfcpu) $ deactivate
+</code></pre>
+
+<p>Tensorflow GPU (similar to Pytorch, check the official <a href="https://www.tensorflow.org/install/gpu">tutorial</a>)</p>
+
+<pre><code class="language-shell">$ python3 -m venv ~/venvs/tfgpu
+$ source ~/venvs/tfgpu/bin/activate
+(tfgpu) $ pip install --upgrade pip setuptools wheel
+(tfgpu) $ pip install --upgrade opencv-python opencv-contrib-python
+(tfgpu) $ pip install --upgrade tensorflow tensorboard keras
+(tfgpu) $ deactivate
+</code></pre>
+
+  <hr>
+  <a href="#top">Back to top</a>
+  
+</div>
+    </section>
+  </main>
+  <footer class="stickyfooter text-center">
+  <small>
+  <div class="small"></div>
+    &copy; Qihang Wang, 2024
+    |
+    
+
+
+  <a href="https://twitter.com/worles_enric" target="_blank" style="color: #1da1f2">
+    <span class="bi bi-twitter"></span>
+  </a>
+
+
+  <a href="https://github.com/worlesenric" target="_blank" style="color: #000;">
+    <span class="bi bi-github"></span>
+  </a>
+
+
+  <a href="https://www.linkedin.com/in/unavailable" target="_blank" style="color: #0077b5;">
+    <span class="bi bi-linkedin"></span>
+  </a>
+
+
+  <a href="mailto:" target="_blank" style="color: #666">
+    <span class="bi bi-envelope-open-fill"></span>
+  </a>
+
+
+  <a href="https://keybase.io/keybase" target="_blank" style="color: #FFA500">
+    <span class="fa fa-keybase"></span>
+  </a>
+
+
+    |
+    Powered by <a href="https://github.com/yak-fumblepack/jekyll-academic">Jekyll Academic Theme</a>
+  </small>
+</footer>
+</body>
+</html>
