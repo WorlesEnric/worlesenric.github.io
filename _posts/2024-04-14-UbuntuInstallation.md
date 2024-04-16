@@ -32,6 +32,13 @@ Staying consistent to the official tutorial, we use [balenaEtcher](https://etche
   
 You may need to modify the boot option, for this, you may hold `F12` while the computer starts.
 
+> Notice: If you encounter the black screen after installed the Ubuntu via `try or install ubuntu`. Here is the solution:
+> * Press `e` to enter the edit mode when the screen shows `try or install ubuntu`.
+> * Find `...quiet splash ---`, delete the `---` and add the `nomodeset` in front of `quiet splash`: `...nomodeset quiet splash`.
+> * Then press `enter`, you should enter the installation interface after several seconds of black wait.
+> * If you still encounter the problem after installation. Please do the same when you restart the machine. (remember to boot from your ubuntu disk insdead of the flash disk)
+> * If you successfully login, edit `/etc/default/grub` with `sudo`, find `GRUB_CMDLINE_LINUX_DEFAULT=`quiet splash`, change it to `GRUB_CMDLINE_LINUX_DEFAULT=`quiet splash nomodeset`.
+
 Setting up Ubuntu installation:
 
 * Computer name: Name-PC
