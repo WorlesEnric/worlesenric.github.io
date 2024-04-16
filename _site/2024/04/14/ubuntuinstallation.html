@@ -158,6 +158,17 @@
 
 <p>You may need to modify the boot option, for this, you may hold <code>F12</code> while the computer starts.</p>
 
+<blockquote>
+  <p>Notice: If you encounter the black screen after installed the Ubuntu via <code>try or install ubuntu</code>. Here is the solution:</p>
+  <ul>
+    <li>Press <code>e</code> to enter the edit mode when the screen shows <code>try or install ubuntu</code>.</li>
+    <li>Find <code>...quiet splash ---</code>, delete the <code>---</code> and add the <code>nomodeset</code> in front of <code>quiet splash</code>: <code>...nomodeset quiet splash</code>.</li>
+    <li>Then press <code>enter</code>, you should enter the installation interface after several seconds of black wait.</li>
+    <li>If you still encounter the problem after installation. Please do the same when you restart the machine. (remember to boot from your ubuntu disk insdead of the flash disk)</li>
+    <li>If you successfully login, edit <code>/etc/default/grub</code> with <code>sudo</code>, find <code>GRUB_CMDLINE_LINUX_DEFAULT=</code>quiet splash<code>, change it to </code>GRUB_CMDLINE_LINUX_DEFAULT=<code>quiet splash nomodeset</code>.</li>
+  </ul>
+</blockquote>
+
 <p>Setting up Ubuntu installation:</p>
 
 <ul>
@@ -347,3 +358,12 @@ $ sudo apt install libcudnn8-samples
 </footer>
 </body>
 </html>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    processEscapes: true
+  }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>

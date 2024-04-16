@@ -1,8 +1,8 @@
 ---
 layout: post
 usehighlight: true
-tags: [LLM, introduction, NLP]
-title: Large Language Models - Aspects and Methods
+tags: [math, deep learning, algebra]
+title: Revisiting Mathematics in Deep Learning (or ML)
 ---
 
 

@@ -4,13 +4,22 @@
  <title>Qihang's site</title>
  <link href="http://localhost:4000/atom.xml" rel="self"/>
  <link href="http://localhost:4000/"/>
- <updated>2024-04-15T08:04:36+08:00</updated>
+ <updated>2024-04-16T18:40:19+08:00</updated>
  <id>http://localhost:4000</id>
  <author>
    <name>Qihang Wang</name>
    <email>worlesenric@gmail.com</email>
  </author>
 
+ 
+ <entry>
+   <title>Finetuning Your LLM - My Workflow</title>
+   <link href="http://localhost:4000/2024/04/15/finetunellm"/>
+   <updated>2024-04-15T00:00:00+08:00</updated>
+   <id>http://localhost:4000/2024/04/15/FinetuneLLM</id>
+   <content type="html">
+</content>
+ </entry>
  
  <entry>
    <title>DL Development Environment 1 &gt; System Installation and Configuration</title>
@@ -61,6 +70,17 @@
 &lt;/ul&gt;
 
 &lt;p&gt;You may need to modify the boot option, for this, you may hold &lt;code&gt;F12&lt;/code&gt; while the computer starts.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Notice: If you encounter the black screen after installed the Ubuntu via &lt;code&gt;try or install ubuntu&lt;/code&gt;. Here is the solution:&lt;/p&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Press &lt;code&gt;e&lt;/code&gt; to enter the edit mode when the screen shows &lt;code&gt;try or install ubuntu&lt;/code&gt;.&lt;/li&gt;
+    &lt;li&gt;Find &lt;code&gt;...quiet splash ---&lt;/code&gt;, delete the &lt;code&gt;---&lt;/code&gt; and add the &lt;code&gt;nomodeset&lt;/code&gt; in front of &lt;code&gt;quiet splash&lt;/code&gt;: &lt;code&gt;...nomodeset quiet splash&lt;/code&gt;.&lt;/li&gt;
+    &lt;li&gt;Then press &lt;code&gt;enter&lt;/code&gt;, you should enter the installation interface after several seconds of black wait.&lt;/li&gt;
+    &lt;li&gt;If you still encounter the problem after installation. Please do the same when you restart the machine. (remember to boot from your ubuntu disk insdead of the flash disk)&lt;/li&gt;
+    &lt;li&gt;If you successfully login, edit &lt;code&gt;/etc/default/grub&lt;/code&gt; with &lt;code&gt;sudo&lt;/code&gt;, find &lt;code&gt;GRUB_CMDLINE_LINUX_DEFAULT=&lt;/code&gt;quiet splash&lt;code&gt;, change it to &lt;/code&gt;GRUB_CMDLINE_LINUX_DEFAULT=&lt;code&gt;quiet splash nomodeset&lt;/code&gt;.&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
 
 &lt;p&gt;Setting up Ubuntu installation:&lt;/p&gt;
 
@@ -439,6 +459,142 @@ $ source ~/venvs/tfgpu/bin/activate
 (tfgpu) $ pip install --upgrade tensorflow tensorboard keras
 (tfgpu) $ deactivate
 &lt;/code&gt;&lt;/pre&gt;
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Large Language Models - Aspects and Methods</title>
+   <link href="http://localhost:4000/2024/04/13/introllm"/>
+   <updated>2024-04-13T00:00:00+08:00</updated>
+   <id>http://localhost:4000/2024/04/13/IntroLLM</id>
+   <content type="html">&lt;p&gt;This post is the note for reviewing the development of the Large Language Models (LLMs), for more detailed and rigorous text, please refer to the monographs.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Warning:&lt;/strong&gt; This post should not serve as an introduction text to whom may not be familiar with the deep learning methodologies, since it contains intensive personal opinions, not assured to be correct.&lt;/p&gt;
+
+&lt;h1 id=&quot;table-of-contents&quot;&gt;Table of Contents&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;#table-of-contents&quot;&gt;Table of Contents&lt;/a&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#sequence-to-sequence-learning&quot;&gt;Sequence-to-sequence Learning&lt;/a&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;a href=&quot;#recurrent-neural-network-and-long-short-term-memory-network&quot;&gt;Recurrent Neural Network and Long Short Term Memory Network&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;sequence-to-sequence-learning&quot;&gt;Sequence-to-sequence Learning&lt;/h2&gt;
+
+&lt;p&gt;Despite the purpose of giving an introduction of neural language processing, we will start from reviewing  the machine translation (MT) task, for the simplicity  of the ideas – transfrom one sequence of words to another sequence of words (in some other language).  Note that in the original &lt;a href=&quot;https://arxiv.org/pdf/1409.3215.pdf&quot;&gt;paper&lt;/a&gt; written by Ilya et al., the sequence to sequence learning could be a quite generalizable concept, below are several examples of sequences:&lt;/p&gt;
+
+&lt;p&gt;&lt;img style=&quot;display: block;&quot; class=&quot;img-fluid&quot; src=&quot;https://i.imgur.com/ZVfrUta.png&quot; alt=&quot;seq2seq.&quot; /&gt;&lt;/p&gt;
+&lt;p class=&quot;small&quot;&gt;&quot;Examples of sequences&quot; by seq2seq ICML 17&apos; tutorial&lt;/p&gt;
+
+&lt;p&gt;In my opinion, the motivation for developing the modern sequence to sequence learning methods is driven by the following two problems:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;The traditional ML methods rely on the consistent input dimensions. That is to say, the model only deals with the inputs that share a constant shape.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Given the training pairs (each pair contains two sequences usually sampled from two domains), the task is essentially to match the distribution of the former to the latter. How do we model, evaluate or optimize the process?&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The first problem drives the development of recurrent neural network (RNN), while the second problem drives the architecture design of the moderm seq2seq learning models. We now briefly introduce the three important models to support the further discussion, they are RNN, LSTM, and self-attention.&lt;/p&gt;
+
+&lt;h3 id=&quot;recurrent-neural-network-and-long-short-term-memory-network&quot;&gt;Recurrent Neural Network and Long Short Term Memory Network&lt;/h3&gt;
+
+&lt;p&gt;We would give a short introduction of the model structures and optimization techniques, the main focus of this section remains to be the discussion in the context of sequence-to-sequence learning.&lt;/p&gt;
+
+&lt;p&gt;In short, Recurrent Neural Network (RNN) is a kind of NN architectures in which the model computation graph is directed cyclic graph, while the Long Short Term Memory (LSTM) Network is a more complex version of the core network of RNN. Though sound intuitive, RNNs are proven to be powerful in many ways, e.g., &lt;a href=&quot;https://binds.cs.umass.edu/papers/1995_Siegelmann_Science.pdf&quot;&gt;RNNs are Turing Complete&lt;/a&gt;, &lt;a href=&quot;http://www.vetta.org/documents/Machine_Super_Intelligence.pdf&quot;&gt;RNNs are nearly intelligence-equivalent by approaching the asymptotic limit in text compression&lt;/a&gt;. To make the following introduction non-trivial, we consider the predicting-next-character task, where the model is provided a sequence of characters and is required to predict the next character in the end of the sequence. (Note: The discussion here are mainly derived from the Ph.D &lt;a href=&quot;http://www.cs.utoronto.ca/~ilya/pubs/ilya_sutskever_phd_thesis.pdf&quot;&gt;thesis&lt;/a&gt; of Ilya Sutskever).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;RNN Formulation&lt;/strong&gt;:&lt;/p&gt;
+
+&lt;p&gt;There are two perspectives on RNN, view it as a single network whose computation graph is cyclic, or view it as a super deep neural network with shared weights among the blocks (unrolled view).&lt;/p&gt;
+
+&lt;p&gt;&lt;img style=&quot;display: block;&quot; class=&quot;img-fluid&quot; src=&quot;https://i.imgur.com/ELw9Iu9.png&quot; alt=&quot;RNN.&quot; /&gt;&lt;/p&gt;
+&lt;p class=&quot;small&quot;&gt;&quot;An unrolled RNN&quot; by colah&apos;s blog&lt;/p&gt;
+
+&lt;p&gt;My apology for the inconsistency, but we are going to use a slightly different notation from the figure. Let $i_t$ be the input at t-th moment, and $o_t$ be the output at t-th moment. Aparently RNN utilizes a hidden representation of the data, denoted by $h_t$. Now we define the input-output map as:&lt;/p&gt;
+
+\[o_t = g(h^o_t) \\
+h^o_t = W_{oh}h_t + b_o \\
+h_t = f(h^i_t) \\
+h^i_t = W_{hi}i_t + W_{hh}h_{t-1} + b_h\]
+
+&lt;p&gt;If you are familiar with the feed forward network, these are just two dense layers connected by the corresponding activation functions. The only difference is that the input layer takes the last moment’s state as part of the input, i.e., a combination of the input and the hidden state.&lt;/p&gt;
+
+&lt;p&gt;Before we discuss the LSTM network, we take a glance at the ackpropagation through time algorithm (BPTT). We first define the training loss function of RNN as the cumulative loss over time:&lt;/p&gt;
+
+\[\mathcal{L}(o, y) = \sum_{t=1}^T \mathcal{l}_t(o_t, y_t)\]
+
+&lt;p&gt;Let’s calculate the partial derivative of the loss over $W_{hi}$ and $W_{hh}$, since the calculation w.r.t $W_{oh}$ is straight forward. We have the following:&lt;/p&gt;
+
+\[\frac{\partial \mathcal{L}}{\partial W_{hh}} = \sum_{t=1}^T \frac{\partial \mathcal{l}_t}{\partial W_{hh}} =  \sum_{t=1}^T \frac{\partial \mathcal{l}_t}{\partial o_t}\frac{\partial o_t}{\partial h^o_t}W_{oh}\frac{\partial h_t}{\partial h^i_t}\frac{\partial h^i_t}{\partial W_{hh}} \\
+\frac{\partial \mathcal{L}}{\partial W_{hi}} = \sum_{t=1}^T \frac{\partial \mathcal{l}_t}{\partial W_{hi}} =  \sum_{t=1}^T \frac{\partial \mathcal{l}_t}{\partial o_t}\frac{\partial o_t}{\partial h^o_t}W_{oh}\frac{\partial h_t}{\partial h^i_t}\frac{\partial h^i_t}{\partial W_{hi}}\]
+
+&lt;p&gt;Note here you cannot directly calculate that $\frac{\partial h^i_t}{\partial W_{hh}}=h_{t-1}$ since $h_{t-1} = h_{t-1}(\cdot, W_{hh})$, that’s because $W_{hh}$ is shared across the whole sequence. Instead, we view the $h_t(W_{hh})$ as the composition of functions $h_t(h_{t-1}(W_{hh}), h_{t-2}(W_{hh}), … h_{1}(W_{hh}))$, applying the chain rule on the partial derivative, we have:&lt;/p&gt;
+
+\[\frac{\partial h_t}{\partial W_{hh}}=\sum_{k=1}^t \frac{\partial h_{t}}{\partial h_{k}}\frac{\partial h_k}{W_{hh}}\]
+</content>
+ </entry>
+ 
+ <entry>
+   <title>Revisiting Mathematics in Deep Learning (or ML)</title>
+   <link href="http://localhost:4000/2024/04/10/fundmentalmath"/>
+   <updated>2024-04-10T00:00:00+08:00</updated>
+   <id>http://localhost:4000/2024/04/10/fundmentalMath</id>
+   <content type="html">&lt;p&gt;This post is the note for reviewing the fundamental mathematics in machine learning, especially, deep learning area. We will briefly revisit the basic concepts and useful tools in the analysis of ML algorithms.&lt;/p&gt;
+
+&lt;p&gt;Here are some excellent materials you may find helpful:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.cis.upenn.edu/~jean/math-deep.pdf&quot;&gt;Algebra, Topology, Differential Calculus, and Optimization Theory For Computer Science and Machine Learning&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf&quot;&gt;The matrix cookbook&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;In fact, most of the contents in this post derive from [1].&lt;/p&gt;
+
+&lt;h1 id=&quot;table-of-contents&quot;&gt;Table of Contents&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;#table-of-contents&quot;&gt;Table of Contents&lt;/a&gt;
+    &lt;ul&gt;
+      &lt;li&gt;&lt;a href=&quot;#preliminaries&quot;&gt;Preliminaries&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#calculus&quot;&gt;Calculus&lt;/a&gt;
+        &lt;ul&gt;
+          &lt;li&gt;&lt;a href=&quot;#curves-scalar-fields-and-gradients&quot;&gt;Curves, Scalar Fields, and Gradients&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;preliminaries&quot;&gt;Preliminaries&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Note&lt;/strong&gt;: This post assumes you have the preliminary knowledge of simple calculus in univariate case and linear algebra. Here provides some concepts which help us see the things in an abstract way (meaning that we then know where can or cannot we generalize our analysis to).&lt;/p&gt;
+
+&lt;p&gt;(Derivative of the univariate scalar-valued function) A function is called &lt;em&gt;differentiable&lt;/em&gt; at a point $a$ of its domain, if its domain contains an open interval containing $a$, and the limit:
+\(\lim_{h\rightarrow 0}\frac{f(a+h)-f(a)}{h}\)
+exists. The $\epsilon-\delta$ definition of the derivative of $f(x)$ w.r.t its input $x$ states, $\forall \epsilon\in\mathbb{R}^+$,  $\exist\delta\in\mathbb{R}^+$, such that, $\forall |h|&amp;lt;\delta$ and $f(a+h)$ is defined, and
+\(|L-\frac{f(a+h)-f(a)}{h}|&amp;lt;\epsilon\)&lt;/p&gt;
+
+&lt;h2 id=&quot;calculus&quot;&gt;Calculus&lt;/h2&gt;
+
+&lt;p&gt;This post assumes you have the preliminary knowledge of simple calculus in univariate case. The overall goal is to generalize the analysis on the function $f:\mathbb{R}\rightarrow\mathbb{R}$ to $f:\mathbb{R}^m\rightarrow\mathbb{R}^n$. Some useful concepts are:&lt;/p&gt;
+
+&lt;h3 id=&quot;curves-scalar-fields-and-gradients&quot;&gt;Curves, Scalar Fields, and Gradients&lt;/h3&gt;
+
+&lt;p&gt;The curves take the form $f:\mathbb{R}\rightarrow\mathbb{R}^n$. We could use $\mathbf{x}(t)$ to denote the curve with $\mathbf{x}\in \mathbf{R}^n$ and $t\in\mathbb{R}$. The curve is said to be &lt;em&gt;differentiable&lt;/em&gt; if as $\Delta t\rightarrow 0$, we have $\mathbf{x}(t+\Delta t)-\mathbf{x}(t)=\mathbf{x}’(t)\Delta t+\mathcal{O}(\Delta t^2)$. This serves as the definition of the derivative $\mathbf{x}’(t)$:&lt;/p&gt;
+
+\[\frac{d\mathbf{x}}{dt}=\mathbf{x}&apos;(t)=\lim_{\Delta t\rightarrow 0}\frac{\Delta\mathbf{x}}{\Delta t}\]
+
+&lt;p&gt;it also follows that $\frac{d}{dt}(\mathbf{g}\mathbf{h})=\frac{d\mathbf{g}}{dt}\mathbf{h}+\frac{d\mathbf{h}}{dt}\mathbf{g}$. The derivative is also called &lt;em&gt;tangent vector&lt;/em&gt; sometimes. Note that the tangent vector depends on the selection of parameter $t$, which prevents us to obtain an invariant measure of the curve. We could instead study the arc length:
+\(s=\int_{t_0}^t dt&apos;|x&apos;(t&apos;)|\)
+moreover, we have $\Delta s=|\Delta x|+\mathcal{O}(|\Delta x|^2)$ (as an aside, $|\cdot|$ here means the length or norm of a vector), we then have $\frac{ds}{dt}=sign(|x’|)$, where $sign(x)$ means that we need to set $x$ to be positive or negative according to whether the direction increase $t$ or not. With $s$ as our invariant parameterisation, we are able to define the induced tangent vector as $\frac{dx}{ds}$, easy to verify that the norm of this tangent vector is always 1. Similarly, the ‘invariance’ induced by the arc-length could be applied into the curvature of the curve (the second order derivative) as $\kappa(x)=\frac{d^2 x}{ds^2}$. Now curves map a scalar parameter to a vector value $x\in\mathbb{R}^n$, the scalar field does the contrary: $\phi:\mathbb{R}^n\rightarrow \mathbb{R}$. Generally we can define the vector field as $\phi:\mathbb{R}^n\rightarrow \mathbb{R}^n$. Consider the scalar field $\phi$, we could access the derivatives by its gradient: 
+\(\nabla \phi=\frac{\partial\phi}{\partial x^i}\mathbf{e}^i\)
+Basicly we just take derivative of $\phi$ w.r.t every coordinate, and constitute a new vector.&lt;/p&gt;
 </content>
  </entry>
  
