@@ -7,7 +7,7 @@ body {
   background: #ffffff;
   color: #000000;
   font-family: Verdana, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  font-size: 14px;
+  font-size: 15px;
   margin-bottom: 40px;
 }
 
@@ -165,7 +165,7 @@ a:hover {
 }
 
 code {
-  font-size: 100%;
+  font-size: 10px;
 }
 
 pre {
@@ -174,7 +174,7 @@ pre {
 }
 pre code {
   border-radius: 5px;
-  font-size: 125%;
+  font-size: 100%;
 }
 
 blockquote {
