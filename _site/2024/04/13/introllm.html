@@ -221,7 +221,7 @@ C_t = A_t\odot C_{t-1}+B_t\odot \hat{C}_t\\
 D_t = \sigma(W_D[h_{t-1},x_t]+b_D)\\
 h_t = D_t\odot tanh(C_t)\]
 
-<p>where $\odot$ denotes the hadamard product $A\odot B_{ij}=A_{ij}B_{ij}$. The terminology “gate” in most of the introduction of LSTM denotes the sigmoid activation, since the resulted vector would serve as a mask with values near 0 or near 1. In the origin form of LSTM network, $A_t$ is set to be $A_{i}=1, \forall i$, thus we have $\frac{\partial C_t}{\partial C_{t-1}}=I$. Here the variant uses a learnt gate (called “forget gate”) to control the memory, the gate would clear some of the values in the memory. So we can initialize $b_A$ as near 1 and then the network is trained to construct forget gate. Now the architecture seems a little bit complicate, we can use the gated recurrent unit (GRU) to simplify the process (practically, GRU saves memory usage):</p>
+<p>where $\odot$ denotes the hadamard product $A\odot B_{ij}=A_{ij}B_{ij}$. The terminology “gate” in most of the introduction of LSTM denotes the sigmoid activation, since the resulted vector would serve as a mask with values near 0 or near 1. In the original form of LSTM network, $A_t$ is set to be $A_{i}=1, \forall i$, thus we have $\frac{\partial C_t}{\partial C_{t-1}}=I$. Here the variant uses a learnt gate (called “forget gate”) to control the memory, the gate would clear some of the values in the memory. So we can initialize $b_A$ as near 1 and then the network is trained to construct forget gate. Now the architecture seems a little bit complicate, we can use the gated recurrent unit (GRU) to simplify the process (practically, GRU saves memory usage):</p>
 
 \[A_t = \sigma(W_A[h_{t-1},x_t]+b_A)\\
 B_t = \sigma(W_B[h_{t-1},x_t]+b_B)\\
@@ -230,381 +230,7 @@ h_t = (\mathbf{1}-B_t)\odot h_{t-1} + B_t\odot C_t\]
 
 <p>Now we’ve come to a critical point, before we go any further, think for a minute: how can we improve those models in every possible ways?</p>
 
-<p>The following are two examples in <a href="https://pytorch.org/tutorials/intermediate/char_rnn_classification_tutorial.html">pytorch turorial: Classifying names via RNN</a> and <a href="https://pytorch.org/tutorials/intermediate/char_rnn_generation_tutorial.html">pytorch tutorial: Generating names via RNN</a>.</p>
-
-<p>In the first tutorial, refering to the origin post:</p>
-
-<p><em>“We will be building and training a basic character-level Recurrent Neural Network (RNN) to classify words. … A character-level RNN reads words as a series of characters - outputting a prediction and “hidden state” at each step, feeding its previous hidden state into each next step. We take the final prediction to be the output, i.e. which class the word belongs to. Specifically, we’ll train on a few thousand surnames from 18 languages of origin, and predict which language a name is from based on the spelling.”</em></p>
-
-<p>Now if we take a look at the goal:</p>
-<pre><code class="language-shell">$ python predict.py Hinton
-(-0.47) Scottish
-(-1.52) English
-(-3.57) Irish
-
-$ python predict.py Schmidhuber
-(-0.19) German
-(-2.48) Czech
-(-2.68) Dutch
-</code></pre>
-
-<p>We will jump the data preprocessing part in this post, and assume the input data are organized as <code>{language: [name1, name2, ...]}</code>, indicating the languages and the corresponding names.</p>
-
-<p>Now we will walk through the (mostly standard) procedures:</p>
-
-<ul>
-  <li>
-    <p>The input letter is converted into tensors using one-hot encoding: <code>a/b/c...=[0,...,0,1,0,...,0]</code>. The word is represented by a tensor stacking the letters: <code>word.size=torch.Size([line_length, 1, n_letters_alphabet])</code>.</p>
-
-    <pre><code class="language-python">import torch
-
-# Find letter index from all_letters, e.g. "a" = 0
-def letterToIndex(letter):
-    return all_letters.find(letter)
-  
-# Just for demonstration, turn a letter into a &lt;1 x n_letters&gt; Tensor
-def letterToTensor(letter):
-    tensor = torch.zeros(1, n_letters)
-    tensor[0][letterToIndex(letter)] = 1
-    return tensor
-  
-# Turn a line into a &lt;line_length x 1 x n_letters&gt;, or an array of one-hot letter vectors
-def lineToTensor(line):
-    tensor = torch.zeros(len(line), 1, n_letters)
-    for li, letter in enumerate(line):
-        tensor[li][0][letterToIndex(letter)] = 1
-    return tensor
-</code></pre>
-  </li>
-  <li>
-    <p>Create an RNN with only forward operations, the pytorch computation graph would handle the recurrent information transmission:</p>
-
-    <pre><code class="language-python">import torch.nn as nn
-import torch.nn.functional as F
-
-class RNN(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        super(RNN, self).__init__()
-
-        self.hidden_size = hidden_size
-
-        self.i2h = nn.Linear(input_size, hidden_size)
-        self.h2h = nn.Linear(hidden_size, hidden_size)
-        self.h2o = nn.Linear(hidden_size, output_size)
-        self.softmax = nn.LogSoftmax(dim=1)
-
-    def forward(self, input, hidden):
-        hidden = F.tanh(self.i2h(input) + self.h2h(hidden))
-        output = self.h2o(hidden)
-        output = self.softmax(output)
-        return output, hidden
-
-    def initHidden(self):
-        return torch.zeros(1, self.hidden_size)
-
-n_hidden = 128
-rnn = RNN(n_letters, n_hidden, n_categories)
-</code></pre>
-  </li>
-  <li>
-    <p>We can train the RNN by a training function like:</p>
-
-    <pre><code class="language-python">learning_rate = 0.005
-
-def train(category_tensor, line_tensor):
-    hidden = rnn.initHidden()
-
-    rnn.zero_grad()
-
-    for i in range(line_tensor.size()[0]):
-        output, hidden = rnn(line_tensor[i], hidden)
-
-    loss = criterion(output, category_tensor)
-    loss.backward()
-
-    # Add parameters' gradients to their values, multiplied by learning rate
-    for p in rnn.parameters():
-        p.data.add_(p.grad.data, alpha=-learning_rate)
-
-    return output, loss.item()
-</code></pre>
-  </li>
-  <li>
-    <p>We can run the training process for the whole corpus:</p>
-
-    <pre><code class="language-python">import time
-import math
-
-n_iters, print_every, plot_every = 100000, 5000, 1000
-
-# Keep track of losses for plotting
-current_loss = 0
-all_losses = []
-
-def randomChoice(l):
-    return l[random.randint(0, len(l) - 1)]
-
-def randomTrainingExample():
-    category = randomChoice(all_categories)
-    line = randomChoice(category_lines[category])
-    category_tensor = torch.tensor([all_categories.index(category)], dtype=torch.long)
-    line_tensor = lineToTensor(line)
-    return category, line, category_tensor, line_tensor
-
-def categoryFromOutput(output):
-    top_n, top_i = output.topk(1)
-    category_i = top_i[0].item()
-    return all_categories[category_i], category_i
-
-def timeSince(since):
-    now = time.time()
-    s = now - since
-    m = math.floor(s / 60)
-    s -= m * 60
-    return '%dm %ds' % (m, s)
-
-start = time.time()
-
-for iter in range(1, n_iters + 1):
-    category, line, category_tensor, line_tensor = randomTrainingExample()
-    output, loss = train(category_tensor, line_tensor)
-    current_loss += loss
-
-    # Print ``iter`` number, loss, name and guess
-    if iter % print_every == 0:
-        guess, guess_i = categoryFromOutput(output)
-        correct = '✓' if guess == category else '✗ (%s)' % category
-        print('%d %d%% (%s) %.4f %s / %s %s' % (iter, iter / n_iters * 100, timeSince(start), loss, line, guess, correct))
-
-    # Add current loss avg to list of losses
-    if iter % plot_every == 0:
-        all_losses.append(current_loss / plot_every)
-        current_loss = 0
-</code></pre>
-  </li>
-  <li>
-    <p>Finally, we can evaluate our model via:</p>
-
-    <pre><code class="language-python"># Keep track of correct guesses in a confusion matrix
-confusion = torch.zeros(n_categories, n_categories)
-n_confusion = 10000
-
-# Just return an output given a line
-def evaluate(line_tensor):
-    hidden = rnn.initHidden()
-
-    for i in range(line_tensor.size()[0]):
-        output, hidden = rnn(line_tensor[i], hidden)
-
-    return output
-
-# Go through a bunch of examples and record which are correctly guessed
-for i in range(n_confusion):
-    category, line, category_tensor, line_tensor = randomTrainingExample()
-    output = evaluate(line_tensor)
-    guess, guess_i = categoryFromOutput(output)
-    category_i = all_categories.index(category)
-    confusion[category_i][guess_i] += 1
-
-# Normalize by dividing every row by its sum
-for i in range(n_categories):
-    confusion[i] = confusion[i] / confusion[i].sum()
-
-# Set up plot
-fig = plt.figure()
-ax = fig.add_subplot(111)
-cax = ax.matshow(confusion.numpy())
-fig.colorbar(cax)
-
-# Set up axes
-ax.set_xticklabels([''] + all_categories, rotation=90)
-ax.set_yticklabels([''] + all_categories)
-
-# Force label at every tick
-ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
-ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
-
-# sphinx_gallery_thumbnail_number = 2
-plt.show()
-</code></pre>
-  </li>
-  <li>
-    <p>For deploying the model to handle the user inputs, we do the following:</p>
-
-    <pre><code class="language-python">def predict(input_line, n_predictions=3):
-    print('\n&gt; %s' % input_line)
-    with torch.no_grad():
-        output = evaluate(lineToTensor(input_line))
-
-        # Get top N categories
-        topv, topi = output.topk(n_predictions, 1, True)
-        predictions = []
-
-        for i in range(n_predictions):
-            value = topv[0][i].item()
-            category_index = topi[0][i].item()
-            print('(%.2f) %s' % (value, all_categories[category_index]))
-            predictions.append([value, all_categories[category_index]])
-
-predict('Dovesky')
-</code></pre>
-  </li>
-</ul>
-
-<p>Now we proceed the second task: generating names using RNN. The results should look like:</p>
-
-<pre><code class="language-shell">$ python sample.py Russian RUS
-Rovakov
-Uantov
-Shavakov
-</code></pre>
-
-<p>The data preprocessing is pretty much alike to the previous task, now we take a look at the model architecture of this task.</p>
-
-<p><img style="display: block;" class="img-fluid" src="https://i.imgur.com/jzVrf7f.png" alt="RNN generator." /></p>
-<p class="small">"Network Architecture" by Sean Robertson</p>
-
-<ul>
-  <li>
-    <p>Construct the model as following. The input of the model is a triplet <code>[category, input_at_t, hidden_state]</code>, the output would then serve as the input for the next time step <code>output_at_t=input_at_t+1</code>.</p>
-
-    <pre><code class="language-python">import torch
-import torch.nn as nn
-
-class RNN(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        super(RNN, self).__init__()
-        self.hidden_size = hidden_size
-
-        self.i2h = nn.Linear(n_categories + input_size + hidden_size, hidden_size)
-        self.i2o = nn.Linear(n_categories + input_size + hidden_size, output_size)
-        self.o2o = nn.Linear(hidden_size + output_size, output_size)
-        self.dropout = nn.Dropout(0.1)
-        self.softmax = nn.LogSoftmax(dim=1)
-
-    def forward(self, category, input, hidden):
-        input_combined = torch.cat((category, input, hidden), 1)
-        hidden = self.i2h(input_combined)
-        output = self.i2o(input_combined)
-        output_combined = torch.cat((hidden, output), 1)
-        output = self.o2o(output_combined)
-        output = self.dropout(output)
-        output = self.softmax(output)
-        return output, hidden
-
-    def initHidden(self):
-        return torch.zeros(1, self.hidden_size)
-</code></pre>
-  </li>
-  <li>
-    <p>We need to first get the random pairs of <code>(category, name)</code>. Then construct the input item as <code>(category, cur_letter, hidden)</code>, the network predict the next letter at every time step. In practice, we create the pairs <code>('a', 'b')</code>, <code>('b', 'c')</code>, <code>('c', '&lt;EOS&gt;')</code> for the word <code>'abc'</code>.</p>
-
-    <pre><code class="language-python">import random
-
-# Random item from a list
-def randomChoice(l):
-    return l[random.randint(0, len(l) - 1)]
-
-# Get a random category and random line from that category
-def randomTrainingPair():
-    category = randomChoice(all_categories)
-    line = randomChoice(category_lines[category])
-    return category, line
-
-# One-hot vector for category
-def categoryTensor(category):
-    li = all_categories.index(category)
-    tensor = torch.zeros(1, n_categories)
-    tensor[0][li] = 1
-    return tensor
-
-# One-hot matrix of first to last letters (not including EOS) for input
-def inputTensor(line):
-    tensor = torch.zeros(len(line), 1, n_letters)
-    for li in range(len(line)):
-        letter = line[li]
-        tensor[li][0][all_letters.find(letter)] = 1
-    return tensor
-
-# ``LongTensor`` of second letter to end (EOS) for target
-def targetTensor(line):
-    letter_indexes = [all_letters.find(line[li]) for li in range(1, len(line))]
-    letter_indexes.append(n_letters - 1) # EOS
-    return torch.LongTensor(letter_indexes)
-
-# Make category, input, and target tensors from a random category, line pair
-def randomTrainingExample():
-    category, line = randomTrainingPair()
-    category_tensor = categoryTensor(category)
-    input_line_tensor = inputTensor(line)
-    target_line_tensor = targetTensor(line)
-    return category_tensor, input_line_tensor, target_line_tensor
-</code></pre>
-  </li>
-  <li>
-    <p>Now we train the network via:</p>
-
-    <pre><code class="language-python">criterion = nn.NLLLoss()
-
-learning_rate = 0.0005
-
-def train(category_tensor, input_line_tensor, target_line_tensor):
-    target_line_tensor.unsqueeze_(-1)
-    hidden = rnn.initHidden()
-
-    rnn.zero_grad()
-
-    loss = torch.Tensor([0]) # you can also just simply use ``loss = 0``
-
-    for i in range(input_line_tensor.size(0)):
-        output, hidden = rnn(category_tensor, input_line_tensor[i], hidden)
-        l = criterion(output, target_line_tensor[i])
-        loss += l
-
-    loss.backward()
-
-    for p in rnn.parameters():
-        p.data.add_(p.grad.data, alpha=-learning_rate)
-
-    return output, loss.item() / input_line_tensor.size(0)
-</code></pre>
-  </li>
-  <li>
-    <p>Now to generate a name given a category, we sample the network via:</p>
-
-    <pre><code class="language-python">max_length = 20
-
-# Sample from a category and starting letter
-def sample(category, start_letter='A'):
-    with torch.no_grad():  # no need to track history in sampling
-        category_tensor = categoryTensor(category)
-        input = inputTensor(start_letter)
-        hidden = rnn.initHidden()
-
-        output_name = start_letter
-
-        for i in range(max_length):
-            output, hidden = rnn(category_tensor, input[0], hidden)
-            topv, topi = output.topk(1)
-            topi = topi[0][0]
-            if topi == n_letters - 1:
-                break
-            else:
-                letter = all_letters[topi]
-                output_name += letter
-            input = inputTensor(letter)
-
-        return output_name
-
-# Get multiple samples from one category and multiple starting letters
-def samples(category, start_letters='ABC'):
-    for start_letter in start_letters:
-        print(sample(category, start_letter))
-
-samples('Russian', 'RUS')
-</code></pre>
-  </li>
-</ul>
+<p>Please check the two examples in <a href="https://pytorch.org/tutorials/intermediate/char_rnn_classification_tutorial.html">pytorch turorial: Classifying names via RNN</a> and <a href="https://pytorch.org/tutorials/intermediate/char_rnn_generation_tutorial.html">pytorch tutorial: Generating names via RNN</a>, these two materials are sufficient (at least for me) for understanding the basic implementation of RNNs.</p>
 
 <h3 id="encoder-decoder-architecture">Encoder-Decoder Architecture</h3>
 
@@ -620,387 +246,15 @@ with Neural Networks”</a> proposes the sequence-to-sequence learning with LSTM
 
 <p>The network usually uses the softmax activation for predicting the distribution (assuming the discrete distribution). In MT task, the decoder would output the translated sequence one word by one word, the previous predicted words would be feed into the decoder as part of the input.</p>
 
-<p>We now walk through the steps in typical sequence to sequence modeling process. The following contents are mainly from this <a href="https://github.com/bentrevett/pytorch-seq2seq">tutorial</a>, and it’s written much better than my post, please refer the origin post if anything is unclear.</p>
+<p>The reader who gets confused may refer to this <a href="https://github.com/bentrevett/pytorch-seq2seq">tutorial</a> for a step-by-step sequence to sequence modeling process, and it’s written much better than my post.</p>
 
-<ul>
-  <li>
-    <p>Datasets are organized to be pairs of English version and German version of one sentence.</p>
+<h3 id="self-attention-and-transformer">Self-Attention and Transformer</h3>
 
-    <pre><code class="language-python">train_data, valid_data, test_data = (
-    dataset["train"],
-    dataset["validation"],
-    dataset["test"],
-)
-train_data[0]
-&gt; {'en': 'Two young, White males are outside near many bushes.',
-'de': 'Zwei junge weiße Männer sind im Freien in der Nähe vieler Büsche.'}
-</code></pre>
-  </li>
-  <li>
-    <p>A tokenizer is used to turn a string into a list of tokens that make up the string. A token is a generalized word in that case, the tokens may be words, punctuation, numbers and any special symbols.</p>
+<p>You may noticed that the context vector serves as the information bottleneck (IB) of the encoder-decoder architecture. The IB would compress and preserve the useful representation of the original input, this aim is, however, not assured to be accomplished. Since the context vector is merely the final hidden state of the RNN encoder, it is natural to think that the context vector would somehow lose information from the faraway input tokens. Now if we stack all the hidden states into one big tensor, apparently there would be redundance of information. We need a selection of the hidden states to preserve the important information, with respect to what? The simple solution is to let the decoder choose. We now introduce the attention mechanism. This mechanism still starts from a simple idea: we cannot take all the hidden states as the context vector, we can sum over them to create one context vector. The summation is weighted by the decoder. So for each decoder step, we regenerate the context vector, to focus on the information that is relavant to the current prediction. Still, a simple idea is to compute a relavance score between the last hidden state of the current decoder input and each encoder hidden state output:</p>
 
-    <pre><code class="language-python">&gt; python -m spacy download en_core_web_sm
-&gt; python -m spacy download de_core_news_sm
-en_nlp = spacy.load("en_core_web_sm")
-de_nlp = spacy.load("de_core_news_sm")
+\[\operatorname{score}\left(\mathbf{h}_{i-1}^d, \mathbf{h}_j^e\right)=\mathbf{h}_{i-1}^d\cdot\mathbf{h}_j^e\]
 
-string = "What a lovely day it is today!"
-[token.text for token in en_nlp.tokenizer(string)]
-&gt; ['What', 'a', 'lovely', 'day', 'it', 'is', 'today', '!']
-  
-# apply tokenizer to all the datasets
-def tokenize_example(example, en_nlp, de_nlp, max_length, lower, sos_token, eos_token):
-    en_tokens = [token.text for token in en_nlp.tokenizer(example["en"])][:max_length]
-    de_tokens = [token.text for token in de_nlp.tokenizer(example["de"])][:max_length]
-    if lower:
-        en_tokens = [token.lower() for token in en_tokens]
-        de_tokens = [token.lower() for token in de_tokens]
-    en_tokens = [sos_token] + en_tokens + [eos_token]
-    de_tokens = [sos_token] + de_tokens + [eos_token]
-    return {"en_tokens": en_tokens, "de_tokens": de_tokens}
-  
-max_length = 1_000
-lower = True
-sos_token = "&lt;sos&gt;"
-eos_token = "&lt;eos&gt;"
-
-fn_kwargs = {
-    "en_nlp": en_nlp,
-    "de_nlp": de_nlp,
-    "max_length": max_length,
-    "lower": lower,
-    "sos_token": sos_token,
-    "eos_token": eos_token,
-}
-
-train_data = train_data.map(tokenize_example, fn_kwargs=fn_kwargs)
-valid_data = valid_data.map(tokenize_example, fn_kwargs=fn_kwargs)
-test_data = test_data.map(tokenize_example, fn_kwargs=fn_kwargs)
-</code></pre>
-  </li>
-  <li>
-    <p>Next we need to build a vocabulary for the source and target languages. The vocabulary transform every token to a index. For the tokens appear in the validation and test sets but not in the training set, we use an “unknown token” (<code>&lt;UNK&gt;</code>) to denote. To make the model aware of <code>&lt;UNK&gt;</code> during training, we replace the tokens which appear less than <code>min_freq</code> with <code>&lt;UNK&gt;</code>. Another special token is <code>&lt;PAD&gt;</code>, in cases that we wish to pass a batch of sentences with different length to the model, we use <code>&lt;PAD&gt;</code> to pad the shorter sentences.</p>
-
-    <pre><code class="language-python">min_freq = 2
-unk_token = "&lt;unk&gt;"
-pad_token = "&lt;pad&gt;"
-
-special_tokens = [
-    unk_token,
-    pad_token,
-    sos_token,
-    eos_token,
-]
-
-en_vocab = torchtext.vocab.build_vocab_from_iterator(
-    train_data["en_tokens"],
-    min_freq=min_freq,
-    specials=special_tokens,
-)
-
-de_vocab = torchtext.vocab.build_vocab_from_iterator(
-    train_data["de_tokens"],
-    min_freq=min_freq,
-    specials=special_tokens,
-)
-
-unk_index = en_vocab[unk_token]
-pad_index = en_vocab[pad_token]
-
-en_vocab.set_default_index(unk_index)
-de_vocab.set_default_index(unk_index)
-
-def numericalize_example(example, en_vocab, de_vocab):
-    en_ids = en_vocab.lookup_indices(example["en_tokens"])
-    de_ids = de_vocab.lookup_indices(example["de_tokens"])
-    return {"en_ids": en_ids, "de_ids": de_ids}
-
-
-fn_kwargs = {"en_vocab": en_vocab, "de_vocab": de_vocab}
-
-train_data = train_data.map(numericalize_example, fn_kwargs=fn_kwargs)
-valid_data = valid_data.map(numericalize_example, fn_kwargs=fn_kwargs)
-test_data = test_data.map(numericalize_example, fn_kwargs=fn_kwargs)
-
-data_type = "torch"
-format_columns = ["en_ids", "de_ids"]
-
-train_data = train_data.with_format(
-    type=data_type, columns=format_columns, output_all_columns=True
-)
-
-valid_data = valid_data.with_format(
-    type=data_type,
-    columns=format_columns,
-    output_all_columns=True,
-)
-
-test_data = test_data.with_format(
-    type=data_type,
-    columns=format_columns,
-    output_all_columns=True,
-)
-</code></pre>
-  </li>
-  <li>
-    <p>Now we create the dataloader for feeding the data into model.</p>
-
-    <pre><code class="language-python"># padding the batch with pad_index (the index of &lt;PAD&gt;)
-def get_collate_fn(pad_index):
-    def collate_fn(batch):
-        batch_en_ids = [example["en_ids"] for example in batch]
-        batch_de_ids = [example["de_ids"] for example in batch]
-        batch_en_ids = nn.utils.rnn.pad_sequence(batch_en_ids, padding_value=pad_index)
-        batch_de_ids = nn.utils.rnn.pad_sequence(batch_de_ids, padding_value=pad_index)
-        batch = {
-            "en_ids": batch_en_ids,
-            "de_ids": batch_de_ids,
-        }
-        return batch
-
-    return collate_fn
-
-def get_data_loader(dataset, batch_size, pad_index, shuffle=False):
-    collate_fn = get_collate_fn(pad_index)
-    data_loader = torch.utils.data.DataLoader(
-        dataset=dataset,
-        batch_size=batch_size,
-        collate_fn=collate_fn,
-        shuffle=shuffle,
-    )
-    return data_loader
-
-batch_size = 128
-
-train_data_loader = get_data_loader(train_data, batch_size, pad_index, shuffle=True)
-valid_data_loader = get_data_loader(valid_data, batch_size, pad_index)
-test_data_loader = get_data_loader(test_data, batch_size, pad_index)
-</code></pre>
-  </li>
-  <li>
-    <p>Build our model in three parts: The encode, the decoder, connecting the encoder and the decoder as the seq2seq model.</p>
-
-    <pre><code class="language-python">class Encoder(nn.Module):
-    def __init__(self, input_dim, embedding_dim, hidden_dim, n_layers, dropout):
-        super().__init__()
-        self.hidden_dim = hidden_dim
-        self.n_layers = n_layers
-        self.embedding = nn.Embedding(input_dim, embedding_dim)
-        self.rnn = nn.LSTM(embedding_dim, hidden_dim, n_layers, dropout=dropout)
-        self.dropout = nn.Dropout(dropout)
-
-    def forward(self, src):
-        embedded = self.dropout(self.embedding(src))
-        outputs, (hidden, cell) = self.rnn(embedded)
-        return hidden, cell
-
-
-class Decoder(nn.Module):
-    def __init__(self, output_dim, embedding_dim, hidden_dim, n_layers, dropout):
-        super().__init__()
-        self.output_dim = output_dim
-        self.hidden_dim = hidden_dim
-        self.n_layers = n_layers
-        self.embedding = nn.Embedding(output_dim, embedding_dim)
-        self.rnn = nn.LSTM(embedding_dim, hidden_dim, n_layers, dropout=dropout)
-        self.fc_out = nn.Linear(hidden_dim, output_dim)
-        self.dropout = nn.Dropout(dropout)
-
-    def forward(self, input, hidden, cell):
-        input = input.unsqueeze(0)
-        embedded = self.dropout(self.embedding(input))
-        output, (hidden, cell) = self.rnn(embedded, (hidden, cell))
-        prediction = self.fc_out(output.squeeze(0))
-        return prediction, hidden, cell
-
-
-class Seq2Seq(nn.Module):
-    def __init__(self, encoder, decoder, device):
-        super().__init__()
-        self.encoder = encoder
-        self.decoder = decoder
-        self.device = device
-        assert (
-            encoder.hidden_dim == decoder.hidden_dim
-        ),
-        assert (
-            encoder.n_layers == decoder.n_layers
-        ),
-
-    def forward(self, src, trg, teacher_forcing_ratio):
-        batch_size = trg.shape[1]
-        trg_length = trg.shape[0]
-        trg_vocab_size = self.decoder.output_dim
-        outputs = torch.zeros(trg_length, batch_size, trg_vocab_size).to(self.device)
-        hidden, cell = self.encoder(src)
-        input = trg[0, :]
-        for t in range(1, trg_length):
-            output, hidden, cell = self.decoder(input, hidden, cell)
-            outputs[t] = output
-            teacher_force = random.random() &lt; teacher_forcing_ratio
-            top1 = output.argmax(1)
-            input = trg[t] if teacher_force else top1
-        return outputs
-</code></pre>
-  </li>
-  <li>
-    <p>Train, evaluate, and serve the model via:</p>
-
-    <pre><code class="language-python">input_dim = len(de_vocab)
-output_dim = len(en_vocab)
-encoder_embedding_dim = 256
-decoder_embedding_dim = 256
-hidden_dim = 512
-n_layers = 2
-encoder_dropout = 0.5
-decoder_dropout = 0.5
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-encoder = Encoder(
-    input_dim,
-    encoder_embedding_dim,
-    hidden_dim,
-    n_layers,
-    encoder_dropout,
-)
-
-decoder = Decoder(
-    output_dim,
-    decoder_embedding_dim,
-    hidden_dim,
-    n_layers,
-    decoder_dropout,
-)
-
-model = Seq2Seq(encoder, decoder, device).to(device)
-
-def init_weights(m):
-    for name, param in m.named_parameters():
-        nn.init.uniform_(param.data, -0.08, 0.08)
-model.apply(init_weights)
-
-def count_parameters(model):
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
-print(f"The model has {count_parameters(model):,} trainable parameters")
-# &gt; The model has 13,898,501 trainable parameters
-
-optimizer = optim.Adam(model.parameters())
-criterion = nn.CrossEntropyLoss(ignore_index=pad_index)
-
-def train_fn(
-    model, data_loader, optimizer, criterion, clip, teacher_forcing_ratio, device
-):
-    model.train()
-    epoch_loss = 0
-    for i, batch in enumerate(data_loader):
-        src = batch["de_ids"].to(device)
-        trg = batch["en_ids"].to(device)
-        optimizer.zero_grad()
-        output = model(src, trg, teacher_forcing_ratio)
-        output_dim = output.shape[-1]
-        output = output[1:].view(-1, output_dim)
-        trg = trg[1:].view(-1)
-        # trg = [(trg length - 1) * batch size]
-        loss = criterion(output, trg)
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
-        optimizer.step()
-        epoch_loss += loss.item()
-    return epoch_loss / len(data_loader)
-
-def evaluate_fn(model, data_loader, criterion, device):
-    model.eval()
-    epoch_loss = 0
-    with torch.no_grad():
-        for i, batch in enumerate(data_loader):
-            src = batch["de_ids"].to(device)
-            trg = batch["en_ids"].to(device)
-            output = model(src, trg, 0)
-            output_dim = output.shape[-1]
-            output = output[1:].view(-1, output_dim)
-            trg = trg[1:].view(-1)
-            loss = criterion(output, trg)
-            epoch_loss += loss.item()
-    return epoch_loss / len(data_loader)
-
-# Training
-n_epochs = 10
-clip = 1.0
-teacher_forcing_ratio = 0.5
-
-best_valid_loss = float("inf")
-
-for epoch in tqdm.tqdm(range(n_epochs)):
-    train_loss = train_fn(
-        model,
-        train_data_loader,
-        optimizer,
-        criterion,
-        clip,
-        teacher_forcing_ratio,
-        device,
-    )
-    valid_loss = evaluate_fn(
-        model,
-        valid_data_loader,
-        criterion,
-        device,
-    )
-    if valid_loss &lt; best_valid_loss:
-        best_valid_loss = valid_loss
-        torch.save(model.state_dict(), "tut1-model.pt")
-    print(f"\tTrain Loss: {train_loss:7.3f} | Train PPL: {np.exp(train_loss):7.3f}")
-    print(f"\tValid Loss: {valid_loss:7.3f} | Valid PPL: {np.exp(valid_loss):7.3f}")
-
-# Evaluating
-model.load_state_dict(torch.load("tut1-model.pt"))
-
-test_loss = evaluate_fn(model, test_data_loader, criterion, device)
-
-print(f"| Test Loss: {test_loss:.3f} | Test PPL: {np.exp(test_loss):7.3f} |")
-
-# Deploying
-def translate_sentence(
-    sentence,
-    model,
-    en_nlp,
-    de_nlp,
-    en_vocab,
-    de_vocab,
-    lower,
-    sos_token,
-    eos_token,
-    device,
-    max_output_length=25,
-):
-    model.eval()
-    with torch.no_grad():
-        if isinstance(sentence, str):
-            tokens = [token.text for token in de_nlp.tokenizer(sentence)]
-        else:
-            tokens = [token for token in sentence]
-        if lower:
-            tokens = [token.lower() for token in tokens]
-        tokens = [sos_token] + tokens + [eos_token]
-        ids = de_vocab.lookup_indices(tokens)
-        tensor = torch.LongTensor(ids).unsqueeze(-1).to(device)
-        hidden, cell = model.encoder(tensor)
-        inputs = en_vocab.lookup_indices([sos_token])
-        for _ in range(max_output_length):
-            inputs_tensor = torch.LongTensor([inputs[-1]]).to(device)
-            output, hidden, cell = model.decoder(inputs_tensor, hidden, cell)
-            predicted_token = output.argmax(-1).item()
-            inputs.append(predicted_token)
-            if predicted_token == en_vocab[eos_token]:
-                break
-        tokens = en_vocab.lookup_tokens(inputs)
-    return tokens
-</code></pre>
-    <h3 id="self-attention-and-transformer">Self-Attention and Transformer</h3>
-  </li>
-</ul>
-
-<p>You may noticed that the context vector serves as the information bottleneck (IB) of the encoder-decoder architecture. The IB would compress and preserve the useful representation of the origin input, this aim is, however, not assured to be accomplished. Since the context vector is merely the final hidden state of the RNN encoder, it is natural to think that the context vector would somehow lose information from the faraway input tokens. Now if we stack all the hidden states into one big tensor, apparently there would be redundance of information. We need a selection of the hidden states to preserve the important information, with respect to what? The simple solution is to let the decoder choose. We now introduce the attention mechanism. This mechanism still starts from a simple idea: we cannot take all the hidden states as the context vector, we can sum over them to create one context vector. The summation is weighted by the decoder. So for each decoder step, we regenerate the context vector, to focus on the information that is relavant to the current prediction. Still, a simple idea is to compute a relavance score between the last hidden state of the current decoder input and each encoder hidden state output $\operatorname{score}(\mathbf{h}<em>{i-1}^d, \mathbf{h}_j^e)=\mathbf{h}</em>{i-1}^d\cdot\mathbf{h}_j^e$. This similarity is then used to compute weights:</p>
+<p>This similarity is then used to compute weights:</p>
 
 \[\alpha_{i j} =\operatorname{softmax}\left(\operatorname{score}\left(\mathbf{h}_{i-1}^d, \mathbf{h}_j^e\right)\right) =\frac{\exp \left(\operatorname{score}\left(\mathbf{h}_{i-1}^d, \mathbf{h}_j^e\right)\right.}{\sum_k \exp \left(\operatorname{score}\left(\mathbf{h}_{i-1}^d, \mathbf{h}_k^e\right)\right)}\]
 
@@ -1011,19 +265,19 @@ def translate_sentence(
     <p>We discuss the transformers in solving the problem of causal language modeling, which means to predict the next word in the sentence in an autoregressive fashion.</p>
   </li>
   <li>
-    <p>Transformers are not built with recurrent blocks, so it’s different from the way we build RNN (LSTM) blocks. Instead, transformers use multiple multi-head self-attention blocks to project the origin input to a series of hidden states of the same length as the input, and finally obtain a highly abstracted representation.</p>
+    <p>Transformers are not built with recurrent blocks, so it’s different from the way we build RNN (LSTM) blocks. Instead, transformers use multiple multi-head self-attention blocks to project the al input to a series of hidden states of the same length as the input, and finally obtain a highly abstracted representation.</p>
   </li>
   <li>
     <p>Transformer’s key novelty is the self-attention mechanism, which allows the transformer to build layer-by-layer information aggregation.</p>
   </li>
 </ul>
 
-<p>Self-attention appears in two ways: causal (backward looking) self-attention and the bidirectional self-attention. The former assumes the causal structure in the sequence where only the historical information is accessable, while the latter could access all the information in the sequence. In this post, we mainly focus on the causal setting, since it fits in the intuition of natural language directly. As we could conclude from the origin attention mechanism, the only aim is to computing a relavance score between the current hidden state and the historical hidden states, the dot product similarity may be too naive. The self-attention introduced a role-based encoding scheme:</p>
+<p>Self-attention appears in two ways: causal (backward looking) self-attention and the bidirectional self-attention. The former assumes the causal structure in the sequence where only the historical information is accessable, while the latter could access all the information in the sequence. In this post, we mainly focus on the causal setting, since it fits in the intuition of natural language directly. As we could conclude from the original attention mechanism, the only aim is to computing a relavance score between the current hidden state and the historical hidden states, the dot product similarity may be too naive. The self-attention introduced a role-based encoding scheme:</p>
 
 <ul>
-  <li>When the embedding is in the role of the current focus, we refer to it as a <code>query</code>.</li>
-  <li>When the embedding is in the role of a preceding input, we refer to it as a <code>key</code>.</li>
-  <li>When it serves as a <code>key</code>, we also compute a <code>value</code> to serve as the embedding to be weighed. So the final aggregation is calculated based on <code>value</code> instead of the embedding <code>x</code> itself.</li>
+  <li>When the embedding is in the role of the current focus, we refer to it as a <strong>query</strong>.</li>
+  <li>When the embedding is in the role of a preceding input, we refer to it as a <strong>key</strong>.</li>
+  <li>When it serves as a <strong>key</strong>, we also compute a <strong>value</strong> to serve as the embedding to be weighed. So the final aggregation is calculated based on <strong>value</strong> instead of the embedding <strong>x</strong> itself.</li>
 </ul>
 
 <p>The self-attention is calculated as:</p>
@@ -1035,14 +289,14 @@ def translate_sentence(
 \mathbf{a}_i &amp; =\sum_{j \leq i} \alpha_{i j} \mathbf{v}_j
 \end{aligned}\]
 
-<p>It’s clear now, we transform the origin embedding into three different vector spaces, and produce the final output to the next layer in the vector space of <code>value</code>. Here $d_k$ is the dimension of the vector space spanned by <code>key</code>s, the division by $\sqrt{d_k}$ is to maintain the numerical stability of the dot product. Another advantage is that for a sequence constitutes of multiple tokens, the self-attention could be effectively calculated by stacking the embeddings of every token:</p>
+<p>It’s clear now, we transform the original embedding into three different vector spaces, and produce the final output to the next layer in the vector space of <strong>value</strong>. Here $d_k$ is the dimension of the vector space spanned by <strong>key</strong>, the division by $\sqrt{d_k}$ is to maintain the numerical stability of the dot product ($q_i \sim \mathcal{N}\left(0, \sigma^2\right), k_i \sim \mathcal{N}\left(0, \sigma^2\right) \rightarrow \operatorname{Var}\left(\sum_{i=1}^{d_k} q_i \cdot k_i\right)=\sigma^4 \cdot d_k$). Another advantage is that for a sequence constitutes of multiple tokens, the self-attention could be effectively calculated by stacking the embeddings of every token:</p>
 
 \[\begin{aligned}
 \mathbf{Q}=\mathbf{X} \mathbf{W}^{\mathbf{Q}} ; \mathbf{K} &amp; =\mathbf{X} \mathbf{W}^{\mathbf{K}} ; \mathbf{V}=\mathbf{X} \mathbf{W}^{\mathbf{V}} \\
 \mathbf{A} &amp; =\operatorname{softmax}(\frac{\mathbf{Q} \cdot \mathbf{K}^T}{\sqrt{d_k}})\mathbf{V}
 \end{aligned}\]
 
-<p>For the causal self-attention, we need to mask the upper triangular of the matrix $\mathbf{Q} \cdot \mathbf{K}^T$, corresponding to the future <code>key</code>s. This matrix also reveals the quadratic relationship between the computation scale and the input sequence length.</p>
+<p>For the causal self-attention, we need to mask the upper triangular of the matrix $\mathbf{Q} \cdot \mathbf{K}^T$, corresponding to the future <strong>keys</strong>. This matrix also reveals the quadratic relationship between the computation scale and the input sequence length.</p>
 
 <p>The above description is referred to as the single head self-attention, the building block of the multi-head self-attention, which is what transformer used in practice. The multi-head self-attention adopts a group of the single-head versions, which means that we calculate $h$ different self-attention results with $\mathbf{W}_i^{\mathbf{Q}}$, $\mathbf{W}_i^{\mathbf{k}}$, and $\mathbf{W}_i^{\mathbf{V}}$, for $i\in[h]$. We aggregate the results with a linear projection $\mathbf{W}^\mathbf{O}$ to produce the output:</p>
 
@@ -1052,7 +306,28 @@ head_i &amp; =\operatorname{softmax}(\frac{\mathbf{Q}_i \cdot \mathbf{K}_i^T}{\s
 \mathbf{A}=\text { MultiHeadAttention }(\mathbf{X})&amp;=\left(\text { head }_1 \oplus \text { head }_2 \ldots \oplus \text { head }_h\right) \mathbf{W}^O
 \end{aligned}\]
 
-<p>where the $\oplus$ denotes the concatenation.</p>
+<p>where the $\oplus$ denotes the concatenation, also note that we use an output matrix $\mathbf{W}^O$ to recover the input dimension $d$ from the hidden dimension $d_k$. Now as illustrated in the figures of transformer architecture, the weighted sum is then passed to a feed-forward network (assuming 1 hidden layer) with two layer normalization operations:</p>
+
+\[\begin{aligned} 
+\mathbf{U}^{''} &amp; =\operatorname{LayerNorm}\left(\mathbf{X}+\mathbf{A} ; \gamma_1, \beta_1\right) \\ 
+\mathbf{U}^{'} &amp; =\mathbf{W}_2^T \operatorname{ReLU}\left(\mathbf{W}_1^T \mathbf{U^{''}}\right) \\
+\mathbf{U} &amp; =\operatorname{LayerNorm}\left(\mathbf{U}^{''}+\mathbf{U}^{'} ; \gamma_2, \beta_2\right)\end{aligned}\]
+
+<p>The layer normalization function is defined as:</p>
+
+\[\begin{aligned} &amp; \operatorname{LayerNorm}(\mathbf{z} ; \gamma, \beta)=\gamma \frac{\left(\mathbf{z}-\mu_{\mathbf{z}}\right)}{\sigma_{\mathbf{z}}}+\beta, \quad \mathbf{z}, \gamma, \beta\in \mathbb{R}^k\\ &amp; \mu_{\mathbf{z}}=\frac{1}{k} \sum_{i=1}^k \mathbf{z}_i, \quad \sigma_{\mathbf{z}}=\sqrt{\frac{1}{k} \sum_{i=1}^k\left(\mathbf{z}_i-\mu_{\mathbf{z}}\right)^2 .}\end{aligned}\]
+
+<p>So what about the transformers? Now we know that the self-attention block(s) transformed the input sequence to another space where the embeddings denote the attention to the other locations in the sequence. Observe that in this process we have the parameter set</p>
+
+\[\theta=\{\mathbf{W}^{Q}, \mathbf{W}^{K}, \mathbf{W}^{V}, \mathbf{W}^{O}, \mathbf{W}_{1}, \mathbf{W}_2, \gamma_1, \beta_1, \gamma_2, \beta_2\}\]
+
+<p>We use $f_{\theta}(\mathbf{x})$ to denote this block, the transformer is the composition of $L$ blocks: $f_{\theta_L} \circ \cdots \circ f_{\theta_1}(\mathrm{x}) \in \mathbb{R}^{n \times d}$. Recall that the hyperparameters are the embedding dim $d$, the hidden dim $d_k$, the feed-forward network width $m$, the number of heads $h$, and the number of blocks $L$, commonly we set $d=512, d_k=64, m=64, h=8$, the original paper set $L=6$, this number has been expanded largely.</p>
+
+<p>Now if we transfer from the RNN families to the transformer families, you may notice that the sequence learning property is lost! Yes, the transformer does not assume any specific structure on the input embeddings set, if you want to learn the sequential structure in the token sequence, you must encode the structure into the embeddings. Now consider the simplest way of introducing the sequential structure embedding: $x=x\oplus p$, where $p$ is an indicator vector $e_i$ with $i$ indicating the $x$’s position in the sequence. The original paper of transformer propose that:</p>
+
+\[\mathbf{p}_{k, 2 i}=\sin \left(\frac{k}{10000^{2 i / d}}\right), \quad \mathbf{p}_{k, 2 i+1}=\cos \left(\frac{k}{10000^{2 i / d}}\right)\]
+
+<p>the positional embedding is then added directly to the input.</p>
 
   <hr>
   <a href="#top">Back to top</a>
